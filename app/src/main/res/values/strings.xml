@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Waochers</string>
+    <string name="title_activity_homeactivity">Waochers</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="toast_unsuccessful_google_login">Sorry! Login unsuccessful. Please try again later.</string>
+    <string name="app_id">141362046230316</string>
+</resources>

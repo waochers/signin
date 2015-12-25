@@ -1,0 +1,133 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/newyorkbg" tools:context=".fragments.LoginFragment">
+
+    <Button
+        android:id="@+id/btnSignIn"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:layout_centerVertical="true"
+        android:background="@drawable/button_rounded_corner"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="Sign In"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editPassword"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_above="@id/btnSignIn"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/edit_text_rounded_corner"
+        android:drawableLeft="@drawable/passwordicon"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:paddingLeft="5dp"
+        android:textColor="#ffffff"
+        android:textSize="15sp" />
+
+    <EditText
+        android:id="@+id/editEmail"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_above="@+id/editPassword"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/edit_text_rounded_corner"
+        android:drawableLeft="@drawable/emailicon"
+        android:drawablePadding="10dp"
+        android:gravity="center_vertical"
+        android:hint="Email or mobile number"
+        android:paddingLeft="5dp"
+        android:textColor="#ffffff"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/btnForgotPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnSignIn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="#00ffffff"
+        android:text="Forgot Password?"
+        android:textColor="#ffffff"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvOR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnForgotPassword"
+        android:layout_marginTop="10dp"
+        android:textColor="#ffffff"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
+        android:text="OR"
+        android:textSize="13sp"/>
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/btnFBLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/tvOR"/>
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginLeft="50dp"
+    <!--android:background="@drawable/fb_final"-->
+
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/btnGoogleLogin"
+        android:layout_width="220dp"
+        android:layout_height="35dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/btnFBLogin"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/google_final"
+        android:layout_marginRight="50dp"
+        android:layout_marginLeft="50dp"/>
+
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true" >
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="fill_parent"
+            android:layout_height="1px"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:background="#A0A0A0" />
+
+        <Button
+            android:id="@+id/btnNewUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="5dp"
+            android:background="#00ffffff"
+            android:text="New User? Sign Up"
+            android:textColor="#ffffff"
+            android:textSize="15sp" />
+    </RelativeLayout>
+
+</RelativeLayout>
