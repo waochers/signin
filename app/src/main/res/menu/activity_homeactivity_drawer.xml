@@ -1,36 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group android:checkableBehavior="single" android:id="@+id/group1">
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_get_coupons"
             android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:title="@string/text_get_coupon" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_my_coupons"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:title="@string/text_my_coupons" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_my_shops"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="@string/text_my_shops" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="@string/text_my_account_title">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nav_report_issue"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="@string/text_report_issue" />
             <item
-                android:id="@+id/nav_send"
+                android:id="@+id/nav_about_us"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="@string/text_about_us" />
         </menu>
     </item>
+
+    <group android:id="@+id/group2">
+        <item
+            android:id="@+id/nav_sign_out"
+            android:icon="@drawable/ic_menu_send"
+            android:title="@string/text_sign_out" />
+    </group>
 
 </menu>
