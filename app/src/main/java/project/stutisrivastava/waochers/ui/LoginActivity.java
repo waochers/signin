@@ -13,13 +13,18 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import project.stutisrivastava.waochers.R;
+import project.stutisrivastava.waochers.util.SystemManager;
 
-public class LoginActivity extends FragmentActivity {
+public class LoginActivity extends BaseActivity{
+
+    private String TAG = "LoginActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        SystemManager.setCurrentActivity(this);
+        SystemManager.setCurrentContext(getApplicationContext());
         //printHashKey();
     }
 
