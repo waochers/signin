@@ -1,9 +1,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
+    <solid android:color="#EACC20"/>
     <gradient
         android:angle="135"
-        android:centerColor="#4CAF50"
-        android:endColor="#2E7D32"
-        android:startColor="#81C784"
+        android:centerColor="@color/waochers_tm_yellow_mid"
+        android:endColor="@color/waochers_tm_yellow_end"
+        android:startColor="@color/waochers_tm_yellow_start"
         android:type="linear" />
 </shape>
