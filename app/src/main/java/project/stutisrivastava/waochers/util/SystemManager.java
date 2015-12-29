@@ -2,8 +2,11 @@ package project.stutisrivastava.waochers.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import project.stutisrivastava.waochers.listeners.ConfirmationListener;
 
 /**
  * Created by stutisrivastava on 28/12/15.
@@ -19,7 +22,6 @@ public class SystemManager {
 
     public static void setCurrentActivity(Activity activity) {
         currentActivity = activity;
-        context = activity.getApplicationContext();
     }
 
     public static void setCurrentContext(Context ctx){
@@ -44,5 +46,24 @@ public class SystemManager {
         }
         return true;
     }
+
+    public static ConfirmationListener getConfirmationListener() {
+        return confirmationListener;
+    }
+
+    private static ConfirmationListener confirmationListener = new ConfirmationListener() {
+        @Override
+        public void onConfirmationSet(boolean ret) {
+            if(ret){
+                Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getCurrentContext().startActivity(intent);
+            }else{
+                getCurrentActivity().finish();
+            }
+        }
+    };
+
+
 
 }
