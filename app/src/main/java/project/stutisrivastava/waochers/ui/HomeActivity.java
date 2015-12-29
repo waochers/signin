@@ -37,8 +37,6 @@ public class HomeActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.e(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        SystemManager.setCurrentActivity(this);
-        SystemManager.setCurrentContext(getApplicationContext());
         setContentView(R.layout.activity_homeactivity);
         super.onCreateDrawer();
     }
@@ -68,4 +66,17 @@ public class HomeActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onResume() {
+        SystemManager.setCurrentActivity(this);
+        SystemManager.setCurrentContext(getApplicationContext());
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SystemManager.setCurrentActivity(null);
+        SystemManager.setCurrentContext(null);
+    }
 }
