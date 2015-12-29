@@ -1,0 +1,1 @@
+package project.stutisrivastava.waochers.listeners;public interface ConfirmationListener {	public void onConfirmationSet(boolean ret);}
