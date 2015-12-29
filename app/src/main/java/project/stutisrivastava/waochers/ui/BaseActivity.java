@@ -30,6 +30,8 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 
 import project.stutisrivastava.waochers.R;
+import project.stutisrivastava.waochers.listeners.ConfirmationListener;
+import project.stutisrivastava.waochers.util.Alert;
 import project.stutisrivastava.waochers.util.Constants;
 import project.stutisrivastava.waochers.util.SystemManager;
 
@@ -46,6 +48,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     private GoogleApiClient mGoogleApiClient;
     private SharedPreferences mSharedPreferences;
     private String loginMethod;
+
 
     protected void onCreateDrawer(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -229,6 +232,9 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         Log.e(TAG, "onResume");
         super.onResume();
+        if(!SystemManager.isNetworkConnected()){
+            Alert.showConfirmationDialog(this,SystemManager.getConfirmationListener(),getString(R.string.title_no_internet),getString(R.string.no_internet_message));
+        }
         if (SystemManager.getCurrentActivity() instanceof LoginActivity)
             return;
         mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
@@ -250,6 +256,8 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         Intent intent = new Intent(this,LoginActivity.class);
         startActivity(intent);
     }
+
+
 
 
 }
