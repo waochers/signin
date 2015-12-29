@@ -50,4 +50,17 @@ public class LoginActivity extends BaseActivity{
         }
     }
 
+    @Override
+    protected void onResume() {
+        SystemManager.setCurrentActivity(this);
+        SystemManager.setCurrentContext(getApplicationContext());
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SystemManager.setCurrentActivity(null);
+        SystemManager.setCurrentContext(null);
+    }
 }
