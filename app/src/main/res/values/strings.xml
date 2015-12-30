@@ -20,8 +20,10 @@
     <string name="text_log_in_again">You have been logged out. Please log in again to continue.</string>
     <string name="signing_out">Signing Out</string>
     <string name="text_my_account_title">My Account</string>
+
     <string name="title_no_internet">No Internet!</string>
     <string name="no_internet_message">Click Ok to enable data.</string>
+
     <string name="text_enter_valid_email">Please enter a valid email.</string>
     <string name="text_enter_registered_email_or_phone">Enter registered email or 10-digit mobile number.</string>
     <string name="text_enter_valid_phone">Please enter a valid phone number.</string>
