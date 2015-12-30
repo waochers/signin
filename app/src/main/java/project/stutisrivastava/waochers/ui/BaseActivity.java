@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -31,6 +32,7 @@ import com.google.android.gms.common.api.Status;
 
 import project.stutisrivastava.waochers.R;
 import project.stutisrivastava.waochers.listeners.ConfirmationListener;
+import project.stutisrivastava.waochers.model.User;
 import project.stutisrivastava.waochers.util.Alert;
 import project.stutisrivastava.waochers.util.Constants;
 import project.stutisrivastava.waochers.util.SystemManager;
@@ -48,7 +50,19 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     private GoogleApiClient mGoogleApiClient;
     private SharedPreferences mSharedPreferences;
     private String loginMethod;
+    private User mUser;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+        mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
+                Activity.MODE_PRIVATE);
+        mUser = new User();
+        mUser.setId(mSharedPreferences.getString(Constants.USERID, null));
+        mUser.setName(mSharedPreferences.getString(Constants.USERNAME, null));
+        mUser.setEmail(mSharedPreferences.getString(Constants.USEREMAIL, null));
+        mUser.setPhoneNumber(mSharedPreferences.getString(Constants.USERPHONE, null));
+    }
 
     protected void onCreateDrawer(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -237,12 +251,14 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         }
         if (SystemManager.getCurrentActivity() instanceof LoginActivity)
             return;
-        mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
-                Activity.MODE_PRIVATE);
+
         loginMethod = mSharedPreferences.getString(Constants.LOGINMETHOD, null);
+
         if(loginMethod==null){
             goToLoginActivity();
+            finish();
         }
+
     }
 
     private void goToLoginActivity() {
@@ -256,8 +272,4 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         Intent intent = new Intent(this,LoginActivity.class);
         startActivity(intent);
     }
-
-
-
-
 }
