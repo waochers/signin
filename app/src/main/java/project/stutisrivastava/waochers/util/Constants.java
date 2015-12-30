@@ -9,4 +9,8 @@ public class Constants {
     public static final String GOOGLELOGIN = "googlelogin";
     public static final String NORMALLOGIN = "normallogin";
     public static final String LOGINMETHOD = "loginmethod";
+    public static final String USERID = "userid";
+    public static final String USERNAME = "username";
+    public static final String USEREMAIL = "useremail";
+    public static final String USERPHONE = "userphonenumber";
 }
