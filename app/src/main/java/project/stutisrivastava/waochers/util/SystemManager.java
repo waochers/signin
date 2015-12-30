@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import project.stutisrivastava.waochers.database.UserDatabase;
 import project.stutisrivastava.waochers.listeners.ConfirmationListener;
 
 /**
@@ -15,6 +16,7 @@ public class SystemManager {
 
     private static Activity currentActivity;
     private static Context context;
+    private static UserDatabase databaseManager;
 
     public static Activity getCurrentActivity() {
         return currentActivity;
@@ -64,6 +66,14 @@ public class SystemManager {
         }
     };
 
+    public static void createDatabaseManager(Context context){
+        databaseManager = new UserDatabase(context);
+    }
 
+    public static UserDatabase getDatabaseManager(){
+        if(databaseManager==null)
+            createDatabaseManager(getCurrentContext());
+        return databaseManager;
+    }
 
 }
