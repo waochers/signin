@@ -4,12 +4,16 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -28,13 +32,10 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
 
 import org.json.JSONObject;
 
@@ -42,11 +43,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import project.stutisrivastava.waochers.R;
-import project.stutisrivastava.waochers.ui.BaseActivity;
+import project.stutisrivastava.waochers.database.DatabaseFields;
+import project.stutisrivastava.waochers.database.UserDatabase;
 import project.stutisrivastava.waochers.ui.HomeActivity;
 import project.stutisrivastava.waochers.ui.LoginActivity;
 import project.stutisrivastava.waochers.util.Constants;
 import project.stutisrivastava.waochers.model.User;
+import project.stutisrivastava.waochers.util.SystemManager;
 
 public class LoginFragment extends Fragment {
 
@@ -67,6 +70,15 @@ public class LoginFragment extends Fragment {
     private boolean isLoggedIn;
     private GoogleSignInOptions gso;
     private ProgressDialog mProgressDialog;
+    private EditText etEmailOrPhone;
+    private EditText etPassword;
+    private Button btnSignIn;
+    private Button btnForgotPassword;
+    private Button btnNewUser;
+    private String mUserEmail;
+    private String mUserPhoneNumber;
+    private String mPassword;
+    private User mUser;
 
     public LoginFragment() {
         Log.e(TAG, "LoginFragmentConstructor");
@@ -188,6 +200,134 @@ public class LoginFragment extends Fragment {
 
     private void onViewCreatedForNormalLogin(View view) {
         //initialize the text boxes and new user and sign in buttons.
+        etEmailOrPhone = (EditText)view.findViewById(R.id.editEmail);
+        /**
+         * To inform user that only email or 10 digit phone number is to be entered.
+         */
+        etEmailOrPhone.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b)
+                    Toast.makeText(getContext(), R.string.text_enter_registered_email_or_phone, Toast.LENGTH_LONG).show();
+            }
+        });
+        /**
+         * Enter press in this edit text should automatically take to next edit text - etPassword.
+         */
+        etEmailOrPhone.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if(keyEvent.getKeyCode() == 66) {
+                    etPassword.requestFocus();
+                }
+                return false;
+            }
+        });
+        etPassword = (EditText)view.findViewById(R.id.editPassword);
+        /**
+         * Enter press in this edit text should start sign in process.
+         */
+        etPassword.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if(keyEvent.getKeyCode()== 66) {
+                    if(validateInformation())
+                        signIn();
+                }
+                return false;
+            }
+        });
+        btnSignIn = (Button)view.findViewById(R.id.btnSignIn);
+        btnSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(validateInformation())
+                    signIn();
+            }
+        });
+        btnForgotPassword = (Button)view.findViewById(R.id.btnForgotPassword);
+        btnForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                forgotPassword();
+            }
+        });
+        btnNewUser = (Button)view.findViewById(R.id.btnNewUser);
+        btnNewUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerNewUser();
+            }
+        });
+    }
+
+    private boolean validateInformation() {
+        String emailOrPhone = etEmailOrPhone.getEditableText().toString();
+        if(emailOrPhone.contains("@")){
+            if(emailOrPhone.contains(".")){
+                mUserEmail = emailOrPhone;
+                mUserPhoneNumber =null;
+            }else {
+                Toast.makeText(getContext(), R.string.text_enter_valid_email, Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        mPassword = etPassword.getEditableText().toString();
+        if(mPassword.isEmpty()){
+            Toast.makeText(getContext(), R.string.text_enter_password, Toast.LENGTH_LONG).show();
+            return false;
+        }else if(mUserEmail !=null)
+                return true;
+
+        if(emailOrPhone.matches("\"^\\d{10}$\"")){
+            mUserPhoneNumber = emailOrPhone;
+            mUserEmail =null;
+            return true;
+        }else
+            Toast.makeText(getContext(), R.string.text_enter_valid_phone,Toast.LENGTH_LONG).show();
+        return false;
+    }
+
+    private void registerNewUser() {
+
+    }
+
+    private void forgotPassword() {
+
+    }
+
+    private void signIn() {
+        String query;
+        if(mUserEmail !=null){
+             query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
+                     DatabaseFields.KEY_CUSTOMER_EMAIL+" = '"+ mUserEmail +"'";
+         }else{
+             query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
+                     DatabaseFields.KEY_CUSTOMER_PHONE+" = "+ mUserPhoneNumber +"";
+         }
+        UserDatabase databaseManager = SystemManager.getDatabaseManager();
+        try {
+            databaseManager.openDatabase();
+            Cursor result = databaseManager.executeRawQuery(query);
+            if(result!=null){
+                result.moveToFirst();
+                String password = result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PASSWORD));
+                if(mPassword.equals(password)){
+                    mUser = new User();
+                    mUser.setId(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NO)));
+                    mUser.setEmail(mUserEmail);
+                    mUser.setPhoneNumber(mUserPhoneNumber);
+                    mUser.setName(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NAME)));
+                }else{
+                    Toast.makeText(getContext(), R.string.text_invalid_password,Toast.LENGTH_LONG).show();
+                }
+            }else
+                Toast.makeText(getContext(), R.string.text_not_yet_registered,Toast.LENGTH_LONG).show();
+            databaseManager.closeDatabase();
+        } catch (Exception e) {
+            Toast.makeText(getContext(), R.string.text_sqlite_exception,Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     private void onViewCreatedForGoogleLogin(View view) {
@@ -278,25 +418,59 @@ public class LoginFragment extends Fragment {
         if (newProfile == null)
             return;
         Log.e("FB Sign In", newProfile.getFirstName() + " " + newProfile.getLastName() + " " + newProfile.getId());
-        User user = new User();
+        mUser = new User();
         //Initialize user information
-        user.setName(newProfile.getFirstName() + " " + newProfile.getLastName());
-        user.setId("f" + newProfile.getId());
-        user.setEmail(null);
-        registerOrSignIn(user);
+        mUser.setName(newProfile.getFirstName() + " " + newProfile.getLastName());
+        mUser.setId("f" + newProfile.getId());
+        mUser.setEmail(null);
+        registerOrSignIn();
         goToHomeActivity(true);
     }
 
     /**
      * Method used to check whether the user is already registered or is signing up for the first time.
-     *
-     * @param user stores the logged in users profile to verify if its a new user or an already signed in one.
+     *mUser stores the logged in users profile to verify if its a new user or an already signed in one.
      */
-    private void registerOrSignIn(User user) {
+    private void registerOrSignIn() {
         Log.e(TAG, "registerOrSignIn");
-        Log.e(TAG, "ID : " + user.getId());
-        Log.e(TAG, "Name : " + user.getName());
-        Log.e(TAG, "Email : " + user.getEmail());
+        Log.e(TAG, "ID : " + mUser.getId());
+        Log.e(TAG, "Name : " + mUser.getName());
+        Log.e(TAG, "Email : " + mUser.getEmail());
+        String query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
+                DatabaseFields.KEY_CUSTOMER_NO+" = "+ mUser.getId();
+        UserDatabase databaseManager=SystemManager.getDatabaseManager();
+        try {
+            databaseManager.openDatabase();
+            Cursor result = databaseManager.executeRawQuery(query);
+            if(result!=null){
+              result.moveToFirst();
+              mUser.setPhoneNumber(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PHONE)));
+              mUser.setEmail(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_EMAIL)));
+            }else{
+                query = "INSERT INTO "+DatabaseFields.TABLE_USER+"("
+                        +DatabaseFields.KEY_CUSTOMER_NO+","
+                        +DatabaseFields.KEY_CUSTOMER_NAME+","
+                        +DatabaseFields.KEY_CUSTOMER_EMAIL+","
+                        +DatabaseFields.KEY_CUSTOMER_PHONE+","
+                        +DatabaseFields.KEY_CUSTOMER_PASSWORD
+                        +") VALUES ("
+                        +mUser.getId()+","
+                        +mUser.getName()+","
+                        +mUser.getEmail()+","
+                        +mUser.getPhoneNumber()+","
+                        +"null,"
+                        +")";
+            }
+            databaseManager.closeDatabase();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(Constants.USERID,mUser.getId());
+        editor.putString(Constants.USERNAME,mUser.getName());
+        editor.putString(Constants.USEREMAIL,mUser.getEmail());
+        editor.putString(Constants.USERPHONE,mUser.getPhoneNumber());
+        editor.apply();
     }
 
     /**
@@ -340,12 +514,12 @@ public class LoginFragment extends Fragment {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             Log.e(TAG, "Google Sign In : " + acct.getDisplayName() + ", " + acct.getId() + acct.getEmail());
-            User user = new User();
+            mUser = new User();
             //Initialize user information
-            user.setName(acct.getDisplayName());
-            user.setId("g" + acct.getId());
-            user.setEmail(acct.getEmail());
-            registerOrSignIn(user);
+            mUser.setName(acct.getDisplayName());
+            mUser.setId("g" + acct.getId());
+            mUser.setEmail(acct.getEmail());
+            registerOrSignIn();
             setValues(false, true, true);
             goToHomeActivity(true);
         } else {
@@ -432,6 +606,10 @@ public class LoginFragment extends Fragment {
             loginMethod = Constants.NORMALLOGIN;
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Constants.LOGINMETHOD, loginMethod);
+        editor.putString(Constants.USERID,mUser.getId());
+        editor.putString(Constants.USERNAME,mUser.getName());
+        editor.putString(Constants.USEREMAIL,mUser.getEmail());
+        editor.putString(Constants.USERPHONE,mUser.getPhoneNumber());
         editor.apply();
     }
 
@@ -479,7 +657,6 @@ public class LoginFragment extends Fragment {
             mProgressDialog.setMessage(getString(R.string.loading));
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
     }
 
