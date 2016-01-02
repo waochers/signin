@@ -252,6 +252,9 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         if (SystemManager.getCurrentActivity() instanceof LoginActivity)
             return;
 
+        if(mSharedPreferences==null)
+            mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
+                    Activity.MODE_PRIVATE);
         loginMethod = mSharedPreferences.getString(Constants.LOGINMETHOD, null);
 
         if(loginMethod==null){
