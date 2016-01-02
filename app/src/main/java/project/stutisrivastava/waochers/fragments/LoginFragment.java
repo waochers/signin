@@ -101,10 +101,20 @@ public class LoginFragment extends Fragment {
         mSharedPreferences = getContext().getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
                 Activity.MODE_PRIVATE);
         getLoginMethod();
-        if(isLoggedIn)
+        if(isLoggedIn) {
             goToHomeActivity(true);
+        }
         onCreateForFBLogin();
         onCreateForGoogleLogin();
+    }
+
+    private void getUserInfo() {
+        Log.e(TAG,"getUSerInfo()");
+        mUser = new User();
+        mUser.setId(mSharedPreferences.getString(Constants.USERID, null));
+        mUser.setName(mSharedPreferences.getString(Constants.USERNAME, null));
+        mUser.setEmail(mSharedPreferences.getString(Constants.USEREMAIL, null));
+        mUser.setPhoneNumber(mSharedPreferences.getString(Constants.USERPHONE, null));
     }
 
     private void onCreateForGoogleLogin() {
@@ -413,7 +423,7 @@ public class LoginFragment extends Fragment {
     private void handleFBSignIn(Profile newProfile) {
         if(newProfile==null)
             goToHomeActivity(false);
-        setValues(true,false,false);
+        setValues(true, false, false);
         Log.e(TAG, "handleFBSignIn");
         if (newProfile == null)
             return;
@@ -437,29 +447,38 @@ public class LoginFragment extends Fragment {
         Log.e(TAG, "Name : " + mUser.getName());
         Log.e(TAG, "Email : " + mUser.getEmail());
         String query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
-                DatabaseFields.KEY_CUSTOMER_NO+" = "+ mUser.getId();
+                DatabaseFields.KEY_CUSTOMER_NO+" = '"+ mUser.getId()+"'";
         UserDatabase databaseManager=SystemManager.getDatabaseManager();
         try {
             databaseManager.openDatabase();
             Cursor result = databaseManager.executeRawQuery(query);
-            if(result!=null){
+            if(result!=null&&result.getCount()!=0){
               result.moveToFirst();
               mUser.setPhoneNumber(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PHONE)));
               mUser.setEmail(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_EMAIL)));
+                Log.e(TAG,"Old signin");
             }else{
+                StringBuilder values = new StringBuilder();
+                values.append("'"+mUser.getId()+"','"
+                        +mUser.getName()+"',");
+                if(mUser.getEmail()==null)
+                    values.append("null,");
+                else
+                    values.append("'"+mUser.getEmail()+"',");
+                if(mUser.getPhoneNumber()==null)
+                    values.append("null,");
+                else
+                    values.append("'" +mUser.getPhoneNumber()+"',");
+                values.append("null");
                 query = "INSERT INTO "+DatabaseFields.TABLE_USER+"("
                         +DatabaseFields.KEY_CUSTOMER_NO+","
                         +DatabaseFields.KEY_CUSTOMER_NAME+","
                         +DatabaseFields.KEY_CUSTOMER_EMAIL+","
                         +DatabaseFields.KEY_CUSTOMER_PHONE+","
                         +DatabaseFields.KEY_CUSTOMER_PASSWORD
-                        +") VALUES ("
-                        +mUser.getId()+","
-                        +mUser.getName()+","
-                        +mUser.getEmail()+","
-                        +mUser.getPhoneNumber()+","
-                        +"null,"
-                        +")";
+                        +") VALUES ("+values +")";
+                databaseManager.executeSQLQuery(query);
+                Log.e(TAG,"new signing");
             }
             databaseManager.closeDatabase();
         } catch (Exception e) {
@@ -468,8 +487,8 @@ public class LoginFragment extends Fragment {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Constants.USERID,mUser.getId());
         editor.putString(Constants.USERNAME,mUser.getName());
-        editor.putString(Constants.USEREMAIL,mUser.getEmail());
-        editor.putString(Constants.USERPHONE,mUser.getPhoneNumber());
+        editor.putString(Constants.USEREMAIL, mUser.getEmail());
+        editor.putString(Constants.USERPHONE, mUser.getPhoneNumber());
         editor.apply();
     }
 
@@ -606,10 +625,10 @@ public class LoginFragment extends Fragment {
             loginMethod = Constants.NORMALLOGIN;
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Constants.LOGINMETHOD, loginMethod);
-        editor.putString(Constants.USERID,mUser.getId());
+        /*editor.putString(Constants.USERID,mUser.getId());
         editor.putString(Constants.USERNAME,mUser.getName());
         editor.putString(Constants.USEREMAIL,mUser.getEmail());
-        editor.putString(Constants.USERPHONE,mUser.getPhoneNumber());
+        editor.putString(Constants.USERPHONE,mUser.getPhoneNumber());*/
         editor.apply();
     }
 
@@ -624,20 +643,18 @@ public class LoginFragment extends Fragment {
             isLoggedIn=false;
             setValues(true, true, true);
             return;
+        }else{
+            getUserInfo();
+            if(loginMethod.equals(Constants.FBLOGIN)) {
+                setValues(true, false, false);
+            }
+            else if(loginMethod.equals(Constants.GOOGLELOGIN)) {
+                setValues(false, true, false);
+            }
+            else if(loginMethod.equals(Constants.NORMALLOGIN)) {
+                setValues(false, false, true);
+            }
         }
-        if(loginMethod.equals(Constants.FBLOGIN)) {
-            //getUserProfile
-            setValues(true, false, false);
-        }
-        else if(loginMethod.equals(Constants.GOOGLELOGIN)) {
-            //getUserProfile
-            setValues(false, true, false);
-        }
-        else if(loginMethod.equals(Constants.NORMALLOGIN)) {
-            //getUserProfile
-            setValues(false, false, true);
-        }
-
     }
 
     /**
