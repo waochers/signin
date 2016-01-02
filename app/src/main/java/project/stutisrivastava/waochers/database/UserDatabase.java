@@ -29,8 +29,9 @@ public class UserDatabase implements DatabaseFields {
                     + KEY_CUSTOMER_NO + " TEXT PRIMARY KEY, "
 					+ KEY_CUSTOMER_EMAIL + " TEXT, "
 					+ KEY_CUSTOMER_PHONE + " INTEGER, "
-                    + KEY_CUSTOMER_NAME +  " TEXT_NOT_NULL"
+                    + KEY_CUSTOMER_NAME +  " TEXT_NOT_NULL,"
 					+ KEY_CUSTOMER_PASSWORD +  " TEXT" + ");");
+
 		}
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
