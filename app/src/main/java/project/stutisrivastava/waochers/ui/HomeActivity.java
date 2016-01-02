@@ -77,6 +77,6 @@ public class HomeActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         SystemManager.setCurrentActivity(null);
-        SystemManager.setCurrentContext(null);
+        SystemManager.setCurrentContext(getApplicationContext());
     }
 }
