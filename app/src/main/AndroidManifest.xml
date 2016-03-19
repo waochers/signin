@@ -19,16 +19,15 @@
             android:name=".ui.HomeActivity"
             android:label="@string/title_activity_homeactivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -39,6 +38,9 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ui.RegisterActivity" />
+        <activity android:name=".ui.ForgotPasswordActivity" />
+        <activity android:name=".ShopListActivity"></activity>
     </application>
 
 </manifest>

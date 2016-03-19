@@ -22,9 +22,9 @@ public class LoginActivity extends BaseActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
         SystemManager.setCurrentActivity(this);
         SystemManager.setCurrentContext(getApplicationContext());
+        setContentView(R.layout.activity_login);
         //printHashKey();
     }
 
@@ -61,6 +61,6 @@ public class LoginActivity extends BaseActivity{
     protected void onPause() {
         super.onPause();
         SystemManager.setCurrentActivity(null);
-        SystemManager.setCurrentContext(null);
+        //SystemManager.setCurrentContext(getApplicationContext());
     }
 }

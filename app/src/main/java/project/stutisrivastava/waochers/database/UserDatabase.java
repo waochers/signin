@@ -19,7 +19,12 @@ public class UserDatabase implements DatabaseFields {
         int result = sqliteDatabase.update(TABLE_USER, values, KEY_CUSTOMER_NO + " = " + id, null);
         Log.e(TAG, "result = " + result);
     }
-    private class DatabaseHelper extends SQLiteOpenHelper {
+
+	public void update(String tableUser, ContentValues contentValues, String selection, String[] selectionArgs) {
+		sqliteDatabase.update(tableUser, contentValues, selection, selectionArgs);
+	}
+
+	private class DatabaseHelper extends SQLiteOpenHelper {
 		public DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		}
@@ -28,7 +33,7 @@ public class UserDatabase implements DatabaseFields {
 			db.execSQL("CREATE TABLE " + TABLE_USER + " ("
                     + KEY_CUSTOMER_NO + " TEXT PRIMARY KEY, "
 					+ KEY_CUSTOMER_EMAIL + " TEXT, "
-					+ KEY_CUSTOMER_PHONE + " INTEGER, "
+					+ KEY_CUSTOMER_PHONE + " TEXT, "
                     + KEY_CUSTOMER_NAME +  " TEXT_NOT_NULL,"
 					+ KEY_CUSTOMER_PASSWORD +  " TEXT" + ");");
 

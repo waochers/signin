@@ -1,5 +1,6 @@
 package project.stutisrivastava.waochers.receivers;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +18,9 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         SystemManager.setCurrentContext(context);
         if(!checkInternet())
         {
-            if(SystemManager.getCurrentActivity()!=null){
-                Alert.showConfirmationDialog(context, SystemManager.getConfirmationListener(), context.getString(R.string.title_no_internet), context.getString(R.string.no_internet_message));
+            Activity activity = SystemManager.getCurrentActivity();
+            if(activity!=null){
+                Alert.showConfirmationDialog(activity.getApplicationContext(), SystemManager.getNetworkConfirmationListener(), context.getString(R.string.title_no_internet), context.getString(R.string.no_internet_message));
             }
         }
 

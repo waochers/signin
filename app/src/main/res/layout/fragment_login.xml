@@ -33,6 +33,7 @@
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
         android:hint="Password"
+        android:textColorHint="@color/waochers_tm_yellow"
         android:inputType="textPassword"
         android:paddingLeft="5dp"
         android:textColor="#ffffff"
@@ -50,6 +51,7 @@
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
         android:hint="Email or mobile number"
+        android:textColorHint="@color/waochers_tm_yellow"
         android:paddingLeft="5dp"
         android:textColor="#ffffff"
         android:textSize="15sp" />
@@ -60,7 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/btnSignIn"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:background="#00ffffff"
         android:text="Forgot Password?"
         android:textColor="#ffffff"
@@ -71,7 +73,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/btnForgotPassword"
-        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:textColor="#ffffff"
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal"
@@ -80,20 +82,17 @@
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/btnFBLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="35dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/tvOR"/>
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="50dp"
     <!--android:background="@drawable/fb_final"-->
 
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/btnGoogleLogin"
-        android:layout_width="220dp"
-        android:layout_height="35dp"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/btnFBLogin"
         android:layout_marginTop="15dp"

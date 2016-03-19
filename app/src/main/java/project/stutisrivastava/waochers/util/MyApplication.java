@@ -16,6 +16,9 @@ import java.security.NoSuchAlgorithmException;
 
 
 public class MyApplication extends Application {
+
+    private String TAG = "MyApplication";
+
     @Override
     public void onCreate() {
         super.onCreate();

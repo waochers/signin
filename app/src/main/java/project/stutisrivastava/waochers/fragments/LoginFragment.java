@@ -2,6 +2,7 @@ package project.stutisrivastava.waochers.fragments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -21,6 +22,7 @@ import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -37,6 +39,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -45,8 +48,10 @@ import java.util.List;
 import project.stutisrivastava.waochers.R;
 import project.stutisrivastava.waochers.database.DatabaseFields;
 import project.stutisrivastava.waochers.database.UserDatabase;
+import project.stutisrivastava.waochers.ui.ForgotPasswordActivity;
 import project.stutisrivastava.waochers.ui.HomeActivity;
 import project.stutisrivastava.waochers.ui.LoginActivity;
+import project.stutisrivastava.waochers.ui.RegisterActivity;
 import project.stutisrivastava.waochers.util.Constants;
 import project.stutisrivastava.waochers.model.User;
 import project.stutisrivastava.waochers.util.SystemManager;
@@ -101,7 +106,7 @@ public class LoginFragment extends Fragment {
         mSharedPreferences = getContext().getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
                 Activity.MODE_PRIVATE);
         getLoginMethod();
-        if(isLoggedIn) {
+        if (isLoggedIn) {
             goToHomeActivity(true);
         }
         onCreateForFBLogin();
@@ -109,7 +114,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void getUserInfo() {
-        Log.e(TAG,"getUSerInfo()");
+        Log.e(TAG, "getUSerInfo()");
         mUser = new User();
         mUser.setId(mSharedPreferences.getString(Constants.USERID, null));
         mUser.setName(mSharedPreferences.getString(Constants.USERNAME, null));
@@ -119,9 +124,9 @@ public class LoginFragment extends Fragment {
 
     private void onCreateForGoogleLogin() {
         Log.e(TAG, "onCreateForGoogleLogin");
-        if(getActivity() instanceof LoginActivity){
-            LoginActivity loginActivity = (LoginActivity)getActivity();
-            gso=loginActivity.getGso();
+        if (getActivity() instanceof LoginActivity) {
+            LoginActivity loginActivity = (LoginActivity) getActivity();
+            gso = loginActivity.getGso();
             mGoogleApiClient = loginActivity.getGoogleApiClient();
         }
     }
@@ -146,6 +151,7 @@ public class LoginFragment extends Fragment {
                                     GraphResponse response) {
                                 // Application code
                                 Log.e(TAG, "Response : " + response.toString());
+                                handleFBSignIn(response);
                             }
                         });
                 Bundle parameters = new Bundle();
@@ -157,12 +163,12 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void onCancel() {
-                setValues(false,false,false);
+                setValues(false, false, false);
             }
 
             @Override
             public void onError(FacebookException e) {
-                setValues(false,false,false);
+                setValues(false, false, false);
             }
         };
 
@@ -210,7 +216,7 @@ public class LoginFragment extends Fragment {
 
     private void onViewCreatedForNormalLogin(View view) {
         //initialize the text boxes and new user and sign in buttons.
-        etEmailOrPhone = (EditText)view.findViewById(R.id.editEmail);
+        etEmailOrPhone = (EditText) view.findViewById(R.id.editEmail);
         /**
          * To inform user that only email or 10 digit phone number is to be entered.
          */
@@ -227,42 +233,42 @@ public class LoginFragment extends Fragment {
         etEmailOrPhone.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                if(keyEvent.getKeyCode() == 66) {
+                if (keyEvent.getKeyCode() == 66) {
                     etPassword.requestFocus();
                 }
                 return false;
             }
         });
-        etPassword = (EditText)view.findViewById(R.id.editPassword);
+        etPassword = (EditText) view.findViewById(R.id.editPassword);
         /**
          * Enter press in this edit text should start sign in process.
          */
         etPassword.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                if(keyEvent.getKeyCode()== 66) {
-                    if(validateInformation())
+                if (keyEvent.getKeyCode() == 66) {
+                    if (validateInformation())
                         signIn();
                 }
                 return false;
             }
         });
-        btnSignIn = (Button)view.findViewById(R.id.btnSignIn);
+        btnSignIn = (Button) view.findViewById(R.id.btnSignIn);
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(validateInformation())
+                if (validateInformation())
                     signIn();
             }
         });
-        btnForgotPassword = (Button)view.findViewById(R.id.btnForgotPassword);
+        btnForgotPassword = (Button) view.findViewById(R.id.btnForgotPassword);
         btnForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 forgotPassword();
             }
         });
-        btnNewUser = (Button)view.findViewById(R.id.btnNewUser);
+        btnNewUser = (Button) view.findViewById(R.id.btnNewUser);
         btnNewUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -272,72 +278,73 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean validateInformation() {
+        Log.e(TAG,"validate Info");
         String emailOrPhone = etEmailOrPhone.getEditableText().toString();
-        if(emailOrPhone.contains("@")){
-            if(emailOrPhone.contains(".")){
+        if (SystemManager.isValidEmailOrPhone(emailOrPhone)){
+            if(emailOrPhone.contains("@")){
                 mUserEmail = emailOrPhone;
                 mUserPhoneNumber =null;
-            }else {
-                Toast.makeText(getContext(), R.string.text_enter_valid_email, Toast.LENGTH_LONG).show();
-                return false;
             }
-        }
+            else{
+                mUserEmail = null;
+                mUserPhoneNumber = emailOrPhone;
+            }
+        }else
+            return false;
         mPassword = etPassword.getEditableText().toString();
-        if(mPassword.isEmpty()){
+        if (mPassword.isEmpty()) {
             Toast.makeText(getContext(), R.string.text_enter_password, Toast.LENGTH_LONG).show();
             return false;
-        }else if(mUserEmail !=null)
-                return true;
-
-        if(emailOrPhone.matches("\"^\\d{10}$\"")){
-            mUserPhoneNumber = emailOrPhone;
-            mUserEmail =null;
-            return true;
-        }else
-            Toast.makeText(getContext(), R.string.text_enter_valid_phone,Toast.LENGTH_LONG).show();
-        return false;
+        }
+        return true;
     }
 
     private void registerNewUser() {
-
+        Log.e(TAG, "register new user");
+        Intent intent = new Intent(getActivity(), RegisterActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     private void forgotPassword() {
-
+        Intent intent = new Intent(getActivity(),ForgotPasswordActivity.class);
+        String userEmailOrPhone = etEmailOrPhone.getEditableText().toString();
+        if(!userEmailOrPhone.isEmpty()){
+            if(SystemManager.isValidEmailOrPhone(userEmailOrPhone)){
+                if(userEmailOrPhone.contains("@"))
+                    intent.putExtra(Constants.USEREMAIL,userEmailOrPhone);
+                else
+                    intent.putExtra(Constants.USERPHONE,userEmailOrPhone);
+            }
+        }
+        startActivity(intent);
     }
 
     private void signIn() {
-        String query;
-        if(mUserEmail !=null){
-             query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
-                     DatabaseFields.KEY_CUSTOMER_EMAIL+" = '"+ mUserEmail +"'";
-         }else{
-             query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
-                     DatabaseFields.KEY_CUSTOMER_PHONE+" = "+ mUserPhoneNumber +"";
-         }
-        UserDatabase databaseManager = SystemManager.getDatabaseManager();
-        try {
-            databaseManager.openDatabase();
-            Cursor result = databaseManager.executeRawQuery(query);
-            if(result!=null){
-                result.moveToFirst();
-                String password = result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PASSWORD));
-                if(mPassword.equals(password)){
-                    mUser = new User();
-                    mUser.setId(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NO)));
-                    mUser.setEmail(mUserEmail);
-                    mUser.setPhoneNumber(mUserPhoneNumber);
-                    mUser.setName(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NAME)));
-                }else{
-                    Toast.makeText(getContext(), R.string.text_invalid_password,Toast.LENGTH_LONG).show();
-                }
-            }else
-                Toast.makeText(getContext(), R.string.text_not_yet_registered,Toast.LENGTH_LONG).show();
-            databaseManager.closeDatabase();
-        } catch (Exception e) {
-            Toast.makeText(getContext(), R.string.text_sqlite_exception,Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
+        Log.e(TAG,"signIn");
+        User user = new User();
+        user.setEmail(mUserEmail);
+        user.setPhoneNumber(mUserPhoneNumber);
+        Cursor result = SystemManager.isRegistered(user);
+        if (result != null) {
+            Log.e(TAG,"sign in result not null");
+            result.moveToFirst();
+            String password = result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PASSWORD));
+            if (mPassword.equals(password)) {
+                mUser = new User();
+                mUser.setId(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NO)));
+                mUser.setEmail(mUserEmail);
+                mUser.setPhoneNumber(mUserPhoneNumber);
+                mUser.setName(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NAME)));
+                setValues(false, false, true);
+                SystemManager.saveInSharedPref(Constants.NORMALLOGIN,mUser,mSharedPreferences);
+                goToHomeActivity(true);
+            } else {
+                Toast.makeText(getContext(), R.string.text_invalid_password, Toast.LENGTH_LONG).show();
+            }
+        } else
+            Toast.makeText(getContext(), R.string.text_not_yet_registered, Toast.LENGTH_LONG).show();
+        SystemManager.closeDB();
     }
 
     private void onViewCreatedForGoogleLogin(View view) {
@@ -414,19 +421,19 @@ public class LoginFragment extends Fragment {
     }
 
 
-
     /**
      * This method is called after a successful signIn from FB. It then uses
      *
      * @param newProfile data to populate the User object and call goToHomeActvity with isLoginSuccessful as true
      */
     private void handleFBSignIn(Profile newProfile) {
-        if(newProfile==null)
-            goToHomeActivity(false);
-        setValues(true, false, false);
         Log.e(TAG, "handleFBSignIn");
-        if (newProfile == null)
+        if (newProfile == null) {
+            Log.e(TAG, "handleFBSignIn having profile : " + null);
+            goToHomeActivity(false);
             return;
+        }
+        setValues(true, false, false);
         Log.e("FB Sign In", newProfile.getFirstName() + " " + newProfile.getLastName() + " " + newProfile.getId());
         mUser = new User();
         //Initialize user information
@@ -437,59 +444,71 @@ public class LoginFragment extends Fragment {
         goToHomeActivity(true);
     }
 
-    /**
-     * Method used to check whether the user is already registered or is signing up for the first time.
-     *mUser stores the logged in users profile to verify if its a new user or an already signed in one.
-     */
-    private void registerOrSignIn() {
-        Log.e(TAG, "registerOrSignIn");
-        Log.e(TAG, "ID : " + mUser.getId());
-        Log.e(TAG, "Name : " + mUser.getName());
-        Log.e(TAG, "Email : " + mUser.getEmail());
-        String query = "SELECT * FROM "+ DatabaseFields.TABLE_USER+" WHERE "+
-                DatabaseFields.KEY_CUSTOMER_NO+" = '"+ mUser.getId()+"'";
-        UserDatabase databaseManager=SystemManager.getDatabaseManager();
+    private void handleFBSignIn(GraphResponse response) {
+        Log.e(TAG, "Handle FB Sign In graph response");
+        FacebookRequestError error = response.getError();
+        if (error == null) {
+            JSONObject jsonObj = response.getJSONObject();
+            try {
+                mUser = new User();
+                mUser.setId("f" + jsonObj.getString(Constants.GRAPH_ID));
+                mUser.setName(jsonObj.getString(Constants.GRAPH_NAME));
+                String email = jsonObj.getString(Constants.GRAPH_EMAIL);
+                if (email != null) {
+                    mUser.setEmail(email);
+                    updateDB();
+                }
+                mUser.setPhoneNumber(null);
+                setValues(true, false, false);
+                registerOrSignIn();
+                goToHomeActivity(true);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            goToHomeActivity(false);
+        }
+    }
+
+    private void updateDB() {
+        UserDatabase databaseManager = SystemManager.getDatabaseManager();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseFields.KEY_CUSTOMER_EMAIL, mUser.getEmail()); // (column name, new row value)
+        String selection = DatabaseFields.KEY_CUSTOMER_NO + " = ?"; // where ID column = rowId (that is, selectionArgs)
+        String[] selectionArgs = {String.valueOf(mUser.getId())};
         try {
             databaseManager.openDatabase();
-            Cursor result = databaseManager.executeRawQuery(query);
-            if(result!=null&&result.getCount()!=0){
-              result.moveToFirst();
-              mUser.setPhoneNumber(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PHONE)));
-              mUser.setEmail(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_EMAIL)));
-                Log.e(TAG,"Old signin");
-            }else{
-                StringBuilder values = new StringBuilder();
-                values.append("'"+mUser.getId()+"','"
-                        +mUser.getName()+"',");
-                if(mUser.getEmail()==null)
-                    values.append("null,");
-                else
-                    values.append("'"+mUser.getEmail()+"',");
-                if(mUser.getPhoneNumber()==null)
-                    values.append("null,");
-                else
-                    values.append("'" +mUser.getPhoneNumber()+"',");
-                values.append("null");
-                query = "INSERT INTO "+DatabaseFields.TABLE_USER+"("
-                        +DatabaseFields.KEY_CUSTOMER_NO+","
-                        +DatabaseFields.KEY_CUSTOMER_NAME+","
-                        +DatabaseFields.KEY_CUSTOMER_EMAIL+","
-                        +DatabaseFields.KEY_CUSTOMER_PHONE+","
-                        +DatabaseFields.KEY_CUSTOMER_PASSWORD
-                        +") VALUES ("+values +")";
-                databaseManager.executeSQLQuery(query);
-                Log.e(TAG,"new signing");
-            }
+            databaseManager.update(DatabaseFields.TABLE_USER, contentValues, selection,
+                    selectionArgs);
             databaseManager.closeDatabase();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(Constants.USERID,mUser.getId());
-        editor.putString(Constants.USERNAME,mUser.getName());
-        editor.putString(Constants.USEREMAIL, mUser.getEmail());
-        editor.putString(Constants.USERPHONE, mUser.getPhoneNumber());
-        editor.apply();
+    }
+
+
+    /**
+     * Method used to check whether the user is already registered or is signing up for the first time.
+     * mUser stores the logged in users profile to verify if its a new user or an already signed in one.
+     */
+    public void registerOrSignIn() {
+        Log.e(TAG, "registerOrSignIn");
+        Log.e(TAG, "ID : " + mUser.getId());
+        Log.e(TAG, "Name : " + mUser.getName());
+        Log.e(TAG, "Email : " + mUser.getEmail());
+        Cursor result = SystemManager.isRegistered(mUser);
+        if (result != null) {
+            result.moveToFirst();
+            mUser.setPhoneNumber(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PHONE)));
+            mUser.setEmail(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_EMAIL)));
+            Log.e(TAG, "Old signin");
+        } else {
+            String query = SystemManager.createRegisterQuery(mUser);
+            SystemManager.execSQLQuery(query);
+            Log.e(TAG, "new signing");
+        }
+        SystemManager.closeDB();
+        SystemManager.saveInSharedPref(null, mUser, mSharedPreferences);
     }
 
     /**
@@ -548,6 +567,7 @@ public class LoginFragment extends Fragment {
     }
 
     /**
+     * i
      * This method handles successful or unsuccessful login. If
      *
      * @param isLoginSuccessful is true we call the activity HomeActivity else a toast is displayed informing
@@ -558,13 +578,19 @@ public class LoginFragment extends Fragment {
         Log.e(TAG, "goToHomeActivity");
         if (isLoginSuccessful) {
             Log.e(TAG, "Sign In Successful, change page");
-            setLoginMethod();
-            Intent intent = new Intent(getActivity().getBaseContext(), HomeActivity.class);
+            if (!isLoggedIn)
+                setLoginMethod();
+            Intent intent;
+            if(getActivity()!=null)
+                intent = new Intent(getActivity(), HomeActivity.class);
+            else
+                intent = new Intent(SystemManager.getCurrentContext(), HomeActivity.class);
+            Toast.makeText(SystemManager.getCurrentContext(), "Welcome "+mUser.getName()+". Happy Discounting :)", Toast.LENGTH_LONG).show();
             startActivity(intent);
             getActivity().finish();
         } else {
             Log.e(TAG, "Sign In UnSuccessful, no change in page");
-            Toast.makeText(getActivity().getApplicationContext(), R.string.toast_unsuccessful_google_login, Toast.LENGTH_LONG);
+            Toast.makeText(SystemManager.getCurrentContext(), R.string.toast_unsuccessful_google_login, Toast.LENGTH_LONG);
         }
     }
 
@@ -575,7 +601,7 @@ public class LoginFragment extends Fragment {
         super.onStop();
         if (loggingThroughFB)
             onStopForFBLogin();
-        if(loggingThroughGoogle)
+        if (loggingThroughGoogle)
             onStopForGoogle();
     }
 
@@ -596,7 +622,7 @@ public class LoginFragment extends Fragment {
         mSharedPreferences = getContext().getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
                 Activity.MODE_PRIVATE);
         getLoginMethod();
-        if(isLoggedIn)
+        if (isLoggedIn)
             goToHomeActivity(true);
         if (loggingThroughFB && !loggingThroughGoogle && !loggingThroughNone)
             onResumeFBSignIn();
@@ -607,7 +633,7 @@ public class LoginFragment extends Fragment {
         Log.e(TAG, "onResumeFBSignIn");
 
         Profile profile = Profile.getCurrentProfile();
-        if(profile!=null)
+        if (profile != null)
             handleFBSignIn(profile);
     }
 
@@ -616,6 +642,7 @@ public class LoginFragment extends Fragment {
      * To identify which method we are using to login, we set the value in shared pref as Google,FB or Normal.
      */
     private void setLoginMethod() {
+        Log.e(TAG, "set login method");
         String loginMethod;
         if (loggingThroughFB)
             loginMethod = Constants.FBLOGIN;
@@ -635,23 +662,22 @@ public class LoginFragment extends Fragment {
     /**
      * Get value from shared preference and identify the method of login.
      */
-    private void getLoginMethod(){
+    private void getLoginMethod() {
         String loginMethod = mSharedPreferences.getString(Constants.LOGINMETHOD, null);
+        Log.e(TAG, "login method is " + loginMethod);
         isLoggedIn = true;
-        if(loginMethod==null){
-            Log.e(TAG,"Not logged in");
-            isLoggedIn=false;
+        if (loginMethod == null) {
+            Log.e(TAG, "Not logged in");
+            isLoggedIn = false;
             setValues(true, true, true);
             return;
-        }else{
+        } else {
             getUserInfo();
-            if(loginMethod.equals(Constants.FBLOGIN)) {
+            if (loginMethod.equals(Constants.FBLOGIN)) {
                 setValues(true, false, false);
-            }
-            else if(loginMethod.equals(Constants.GOOGLELOGIN)) {
+            } else if (loginMethod.equals(Constants.GOOGLELOGIN)) {
                 setValues(false, true, false);
-            }
-            else if(loginMethod.equals(Constants.NORMALLOGIN)) {
+            } else if (loginMethod.equals(Constants.NORMALLOGIN)) {
                 setValues(false, false, true);
             }
         }

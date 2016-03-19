@@ -39,6 +39,7 @@ public class HomeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homeactivity);
         super.onCreateDrawer();
+        super.setDrawerContent();
     }
 
 
@@ -76,7 +77,7 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        SystemManager.setCurrentActivity(null);
-        SystemManager.setCurrentContext(getApplicationContext());
+       SystemManager.setCurrentActivity(null);
+        //SystemManager.setCurrentContext(getApplicationContext());
     }
 }

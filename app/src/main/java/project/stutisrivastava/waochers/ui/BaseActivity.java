@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
@@ -31,7 +32,6 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 
 import project.stutisrivastava.waochers.R;
-import project.stutisrivastava.waochers.listeners.ConfirmationListener;
 import project.stutisrivastava.waochers.model.User;
 import project.stutisrivastava.waochers.util.Alert;
 import project.stutisrivastava.waochers.util.Constants;
@@ -52,16 +52,13 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     private String loginMethod;
     private User mUser;
 
+    private boolean isSigningOut;
+    private TextView tvHeaderUserName;
+    private TextView tvHeaderEmailOrPhone;
+
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-        mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
-                Activity.MODE_PRIVATE);
-        mUser = new User();
-        mUser.setId(mSharedPreferences.getString(Constants.USERID, null));
-        mUser.setName(mSharedPreferences.getString(Constants.USERNAME, null));
-        mUser.setEmail(mSharedPreferences.getString(Constants.USEREMAIL, null));
-        mUser.setPhoneNumber(mSharedPreferences.getString(Constants.USERPHONE, null));
     }
 
     protected void onCreateDrawer(){
@@ -84,7 +81,31 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View header = navigationView.getHeaderView(0);
+        tvHeaderUserName = (TextView) header.findViewById(R.id.tv_user_name);
+        tvHeaderEmailOrPhone = (TextView) header.findViewById(R.id.tv_email_or_phone);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    public void setDrawerContent(){
+        mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
+                Activity.MODE_PRIVATE);
+
+        mUser = new User();
+        mUser.setId(mSharedPreferences.getString(Constants.USERID, null));
+        mUser.setName(mSharedPreferences.getString(Constants.USERNAME, null));
+        mUser.setEmail(mSharedPreferences.getString(Constants.USEREMAIL, null));
+        mUser.setPhoneNumber(mSharedPreferences.getString(Constants.USERPHONE, null));
+
+        if(mUser.getId()!=null){
+            tvHeaderUserName.setText(mUser.getName());
+            if(mUser.getPhoneNumber()!=null)
+                tvHeaderEmailOrPhone.setText(mUser.getPhoneNumber());
+            else if(mUser.getEmail()!=null)
+                tvHeaderEmailOrPhone.setText(mUser.getEmail());
+            else
+                tvHeaderEmailOrPhone.setText(null);
+        }
     }
 
     public GoogleSignInOptions getGso() {
@@ -141,7 +162,8 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         Log.e(TAG, "onConnected");
         if (SystemManager.getCurrentActivity() instanceof LoginActivity)
             return;
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+        if(isSigningOut)
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
@@ -195,8 +217,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+
     private void initiateSignOut() {
         Log.e(TAG, "initiateSignOut");
+        isSigningOut = true;
         if(loginMethod.equals(Constants.FBLOGIN)) {
             //getUserProfile
             signOutFromFB();
@@ -231,7 +255,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     private void signOutFromNormalLogin() {
         Log.e(TAG, "signOutFromNormalLogin");
-
+        goToLoginActivity();
     }
 
     private void signOutFromFB() {
@@ -247,7 +271,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         Log.e(TAG, "onResume");
         super.onResume();
         if(!SystemManager.isNetworkConnected()){
-            Alert.showConfirmationDialog(this,SystemManager.getConfirmationListener(),getString(R.string.title_no_internet),getString(R.string.no_internet_message));
+            Alert.showConfirmationDialog(this,SystemManager.getNetworkConfirmationListener(),getString(R.string.title_no_internet),getString(R.string.no_internet_message));
         }
         if (SystemManager.getCurrentActivity() instanceof LoginActivity)
             return;
@@ -256,7 +280,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             mSharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
                     Activity.MODE_PRIVATE);
         loginMethod = mSharedPreferences.getString(Constants.LOGINMETHOD, null);
-
+        Log.e(TAG, "onResume login method is " + loginMethod);
         if(loginMethod==null){
             goToLoginActivity();
             finish();
@@ -275,4 +299,6 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         Intent intent = new Intent(this,LoginActivity.class);
         startActivity(intent);
     }
+
+
 }
