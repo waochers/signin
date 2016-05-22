@@ -34,6 +34,9 @@
     <string name="text_btn_register">Register</string>
     <string name="et_register_name_hint">Name</string>
     <string name="et_register_email_or_phone_hint">Email or Phone Number</string>
+    <string name="et_register_email">Email </string>
+    <string name="et_register_phone">Phone </string>
+
     <string name="et_register_password_hint">Password</string>
     <string name="et_register_confirm_password">Confirm Password</string>
     <string name="blank_name_error">Name field cannot be blank.</string>
@@ -55,5 +58,17 @@
     <string name="text_btn_ok">OK</string>
     <string name="msg_password_reset_successful">Password reset successful! Login to continue.</string>
     <string name="msg_password_reset_unsuccessful">Password Reset failed. Please try again later.</string>
+    <string name="service_not_available">Service is not available</string>
+    <string name="invalid_lat_long_used">Invalid lat long</string>
+    <string name="no_address_found">No address found</string>
+    <string name="address_found">address found</string>
+    <string name="no_geocoder_available">No geocoder avialable</string>
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="title_activity_blahactivity">blahactivity</string>
+    <string name="et_otp_hint">OTP</string>
+    <string name="text_btn_verify_otp">Verify OTP</string>
+    <string name="fb_login_protocol_scheme">141362046230316</string>
+    <string name="plaese_login_to_continue">Please login to coninue!</string>
+    <string name="you_are_in">You are in</string>
 
 </resources>

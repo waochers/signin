@@ -6,8 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,6 +34,12 @@ public class SystemManager {
     private static Context context;
     private static UserDatabase databaseManager;
     private static ConfirmationListener OTPRetryConfirmationListener;
+
+    public static Location getmCurrentLocation() {
+        return mCurrentLocation;
+    }
+
+    private static Location mCurrentLocation;
 
     public static Activity getCurrentActivity() {
         return currentActivity;
@@ -259,4 +269,50 @@ public class SystemManager {
         }
 
     }
+
+    public static boolean isGPSEnabled (Context mContext){
+        LocationManager locationManager = (LocationManager)
+                mContext.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    public static void confirmationToTurnGPSOn() {
+        ConfirmationListener gpsListener = new ConfirmationListener() {
+            @Override
+            public void onConfirmationSet(boolean ret) {
+                if(ret) {
+                    turnGPSOn();
+                }else {
+                    currentActivity.finish();
+                }
+            }
+        };
+        Alert.showConfirmationDialog(currentActivity, gpsListener, "Location Disabled", "Click OK to enable Location Services");
+    }
+
+    private static void turnGPSOn() {
+        Intent intent = new Intent("android.location.GPS_ENABLED_CHANGE");
+        intent.putExtra("enabled", true);
+        Context ctx = getCurrentContext();
+        ctx.sendBroadcast(intent);
+
+        String provider = Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        if(!provider.contains("gps")){ //if gps is disabled
+            final Intent poke = new Intent();
+            poke.setClassName("com.android.settings", "com.android.settings.widget.SettingsAppWidgetProvider");
+            poke.addCategory(Intent.CATEGORY_ALTERNATIVE);
+            poke.setData(Uri.parse("3"));
+            ctx.sendBroadcast(poke);
+        }
+    }
+
+    public static void setLocation(Location loc){
+        double currLatitude = loc.getLatitude();
+        double currLongitude =loc.getLongitude();
+        mCurrentLocation = loc;
+        Log.e(TAG, "lat " + currLatitude);
+        Log.e(TAG, "long " + currLongitude);
+//        Toast.makeText(context,"Lat : "+currLatitude+" Long : "+currLongitude,Toast.LENGTH_LONG).show();
+    }
+
 }

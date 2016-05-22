@@ -5,71 +5,99 @@ package project.stutisrivastava.waochers.adapter;
  * This adapter is for the categories loaded after login in HomeActivity
  */
 
-import android.content.Intent;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.List;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+
+import java.util.ArrayList;
 
 import project.stutisrivastava.waochers.R;
-import project.stutisrivastava.waochers.ShopListActivity;
-import project.stutisrivastava.waochers.util.Constants;
-import project.stutisrivastava.waochers.util.SystemManager;
+import project.stutisrivastava.waochers.util.CustomVolleyRequest;
 
-public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>{
+public class CategoryAdapter extends BaseAdapter {
     private static final String TAG = "CategoryAdapter";
-    List<String> categories;
+    TextView categoryName;
+    NetworkImageView categoryIcon;
+    //Imageloader to load images
+    private ImageLoader imageLoader;
+    //Context
+    private Context context;
+    //Array List that would contain the urls and the titles for the images
+    private ArrayList<String> images;
+    private ArrayList<String> names;
 
-    public CategoryAdapter(List<String> categories){
-        this.categories = categories;
+    private LayoutInflater inflater;
+
+    public CategoryAdapter(Context context, ArrayList<String> images, ArrayList<String> names) {
+        //Getting all the values
+        this.context = context;
+        this.images = images;
+        this.names = names;
     }
 
     @Override
-    public CategoryViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_category_card_view, viewGroup, false);
-        CategoryViewHolder pvh = new CategoryViewHolder(v);
-        return pvh;
+    public int getCount() {
+        return images.size();
     }
 
     @Override
-    public void onBindViewHolder(CategoryViewHolder categoryViewHolder, int i) {
-        final int pos = i;
-            categoryViewHolder.categoryName.setText(categories.get(i));
-            categoryViewHolder.cv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String categoryName = categories.get(pos);
-                    Intent intent = new Intent(SystemManager.getCurrentContext(), ShopListActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra(Constants.CATEGORY, categoryName);
-                    SystemManager.getCurrentContext().startActivity(intent);
-                }
-            });
+    public Object getItem(int position) {
+        return images.get(position);
     }
 
     @Override
-    public int getItemCount() {
-        return categories.size();
+    public long getItemId(int position) {
+        return 0;
     }
 
-    public String getItem(int pos){
-        return categories.get(pos);
-    }
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        //Creating a linear layout
 
-    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
-        CardView cv;
-        TextView categoryName;
-        CategoryViewHolder(View itemView) {
-            super(itemView);
-            cv = (CardView)itemView.findViewById(R.id.cvCategory);
-            categoryName = (TextView)itemView.findViewById(R.id.tv_card_category_name);
+        if (inflater == null)
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (convertView == null)
+            convertView = inflater.inflate(R.layout.layout_category_card_view, null);
+        if (imageLoader == null) {
+            imageLoader = CustomVolleyRequest.getInstance(context).getImageLoader();
         }
+        Log.e(TAG, "" + images.get(position));
+        NetworkImageView networkImageView = (NetworkImageView) convertView.findViewById(R.id.category_icon);
+        imageLoader.get(images.get(position), ImageLoader.getImageListener(networkImageView, R.drawable.uniform, R.drawable.uniform));
+        networkImageView.setImageUrl(images.get(position), imageLoader);
+        TextView textView = (TextView) convertView.findViewById(R.id.category_name);
+
+//
+//
+//        // title
+//        title.setText(m.getTitle());
+        //NetworkImageView
+
+        //Initializing ImageLoader
 
 
+        //Setting the image url to load
+        //  networkImageView.setImageUrl(images.get(position), imageLoader);
+
+        //Creating a textview to show the title
+
+
+        //Scaling the imageview
+//        networkImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//        networkImageView.setLayoutParams(new GridView.LayoutParams(500, 500));
+
+        textView.setText(names.get(position));
+        //Adding views to the layout
+
+
+        //Returnint the layout
+        return convertView;
     }
-
 }

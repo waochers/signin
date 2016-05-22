@@ -1,29 +1,21 @@
 {
   "project_info": {
-    "project_id": "waochers",
-    "project_number": "31760334550",
-    "name": "Waochers"
+    "project_id": "waochers-1259",
+    "project_number": "355147170048",
+    "name": "waochers"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:31760334550:android:f0d4676e57716be6",
+        "mobilesdk_app_id": "1:355147170048:android:f0d4676e57716be6",
         "client_id": "android:project.stutisrivastava.waochers",
         "client_type": 1,
         "android_client_info": {
-          "package_name": "project.stutisrivastava.waochers"
+          "package_name": "project.stutisrivastava.waochers",
+          "certificate_hash": []
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "31760334550-qsrr5ltsb35ehupanq24i0h9rot8makj.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "project.stutisrivastava.waochers",
-            "certificate_hash": "074670763D41E28496B84385EB0B2EA2A7C2A4F6"
-          }
-        }
-      ],
+      "oauth_client": [],
       "api_key": [],
       "services": {
         "analytics_service": {
@@ -38,7 +30,7 @@
           "other_platform_oauth_client": []
         },
         "google_signin_service": {
-          "status": 2
+          "status": 1
         },
         "ads_service": {
           "status": 1

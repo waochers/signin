@@ -3,12 +3,21 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here.primary,primarydark,accent -->
-        <item name="colorPrimary">@color/waochers_tm_black</item>
-        <item name="colorPrimaryDark">@color/waochers_tm_yellow</item>
-        <item name="colorAccent">@color/waochers_tm_bluenew</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryDark">@color/waocher_theme</item>
+        <item name="colorControlNormal">@color/iron</item>
+        <item name="colorControlActivated">@color/white</item>
+        <item name="colorControlHighlight">@color/white</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <!--<item name="android:colorPrimary">@color/PrimaryColor</item>-->
+        <!--<item name="android:colorPrimaryDark">@color/PrimaryDarkColor</item>-->
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

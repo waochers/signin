@@ -22,14 +22,24 @@
         android:hint="@string/et_register_name_hint"/>
 
     <EditText
-        android:id="@+id/et_register_email_or_phone"
+        android:id="@+id/et_register_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:layout_below="@+id/et_register_name"
         android:layout_marginTop="5dp"
         android:backgroundTint="@color/waochers_tm_yellow"
-        android:hint="@string/et_register_email_or_phone_hint"/>
+        android:hint="@string/et_register_email"/>
+
+    <EditText
+        android:id="@+id/et_register_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:layout_below="@+id/et_register_email"
+        android:layout_marginTop="5dp"
+        android:backgroundTint="@color/waochers_tm_yellow"
+        android:hint="@string/et_register_phone"/>
 
     <EditText
         android:id="@+id/et_register_password"
@@ -37,7 +47,7 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:inputType="textPassword"
-        android:layout_below="@+id/et_register_email_or_phone"
+        android:layout_below="@+id/et_register_phone"
         android:layout_marginTop="5dp"
         android:backgroundTint="@color/waochers_tm_yellow"
         android:hint="@string/et_register_password_hint"/>
@@ -97,5 +107,4 @@
         android:textColor="#ffffff"
         android:textSize="16sp"
         android:textStyle="bold" />
-
 </RelativeLayout>

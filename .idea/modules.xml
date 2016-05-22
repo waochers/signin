@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Waochers.iml" filepath="$PROJECT_DIR$/Waochers.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/calligraphy220aar_FILES/calligraphy220aar_FILES.iml" filepath="$PROJECT_DIR$/calligraphy220aar_FILES/calligraphy220aar_FILES.iml" />
+      <module fileurl="file://$PROJECT_DIR$/signin.iml" filepath="$PROJECT_DIR$/signin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/volley/volley.iml" filepath="$PROJECT_DIR$/volley/volley.iml" />
     </modules>
   </component>
 </project>

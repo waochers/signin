@@ -1,22 +1,43 @@
 package project.stutisrivastava.waochers.fragments;
 
+/**
+ * Created by vardan on 4/19/16.
+ */
+
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.support.v4.app.Fragment;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -43,29 +64,48 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import project.stutisrivastava.waochers.R;
-import project.stutisrivastava.waochers.database.DatabaseFields;
-import project.stutisrivastava.waochers.database.UserDatabase;
+import project.stutisrivastava.waochers.model.User;
 import project.stutisrivastava.waochers.ui.ForgotPasswordActivity;
 import project.stutisrivastava.waochers.ui.HomeActivity;
 import project.stutisrivastava.waochers.ui.LoginActivity;
+import project.stutisrivastava.waochers.ui.MenuActivity;
 import project.stutisrivastava.waochers.ui.RegisterActivity;
 import project.stutisrivastava.waochers.util.Constants;
-import project.stutisrivastava.waochers.model.User;
+import project.stutisrivastava.waochers.util.LearningToUseVolley;
 import project.stutisrivastava.waochers.util.SystemManager;
 
-public class LoginFragment extends Fragment {
+import static android.Manifest.permission.READ_CONTACTS;
 
+public class LoginFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final int RC_SIGN_IN = 9001;
+    /**
+     * Id to identity READ_CONTACTS permission request.
+     */
+    private static final int REQUEST_READ_CONTACTS = 0;
+    /**
+     * A dummy authentication store containing known user names and passwords.
+     * TODO: remove after connecting to a real authentication system.
+     */
+    private static final String[] DUMMY_CREDENTIALS = new String[]{
+            "foo@example.com:hello", "bar@example.com:world"
+    };
+    public static Context myContext;
+    public static String fbUserId;
+    public static String fbUserName;
+    public static String fbUserEmail;
+    LearningToUseVolley helper = LearningToUseVolley.getInstance();
+    RegisterActivity regActivity = new RegisterActivity();
     private SharedPreferences mSharedPreferences;
     private String TAG = "LoginFragment";
-
     private SignInButton btnGoogleLogIn;
     private GoogleApiClient mGoogleApiClient;
-    private static final int RC_SIGN_IN = 9001;
     private LoginButton btnFacebookLogin;
-
     private CallbackManager callbackManager;
     private AccessTokenTracker accessTokenTracker;
     private ProfileTracker profileTracker;
@@ -84,15 +124,20 @@ public class LoginFragment extends Fragment {
     private String mUserPhoneNumber;
     private String mPassword;
     private User mUser;
-
-    public LoginFragment() {
-        Log.e(TAG, "LoginFragmentConstructor");
-    }
-
+    private AutoCompleteTextView mEmailView;
+    private EditText mPasswordView;
+    private View mProgressView;
+    private View mLoginFormView;
     /**
      * Callback object used to handle FB login
      */
     private FacebookCallback<LoginResult> callback;
+    private String login1Method;
+    private Boolean check = false;
+
+    public LoginFragment() {
+        Log.e(TAG, "LoginFragmentConstructor");
+    }
 
     /**
      * For each method of this fragment, we will have two methods one that will handle all the FB login related
@@ -103,6 +148,7 @@ public class LoginFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         Log.e(TAG, "onCreate");
         super.onCreate(savedInstanceState);
+        myContext = getActivity().getBaseContext();
         mSharedPreferences = getContext().getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
                 Activity.MODE_PRIVATE);
         getLoginMethod();
@@ -113,8 +159,11 @@ public class LoginFragment extends Fragment {
         onCreateForGoogleLogin();
     }
 
-    private void getUserInfo() {
+    public void getUserInfo() {
         Log.e(TAG, "getUSerInfo()");
+        Log.e("valuessss", "" + mSharedPreferences.getString(Constants.USERNAME, null));
+        Log.e("valuessss", "" + mSharedPreferences.getString(Constants.USEREMAIL1, null));
+
         mUser = new User();
         mUser.setId(mSharedPreferences.getString(Constants.USERID, null));
         mUser.setName(mSharedPreferences.getString(Constants.USERNAME, null));
@@ -152,13 +201,14 @@ public class LoginFragment extends Fragment {
                                 // Application code
                                 Log.e(TAG, "Response : " + response.toString());
                                 handleFBSignIn(response);
+
                             }
                         });
                 Bundle parameters = new Bundle();
                 parameters.putString("fields", "id,name,email");
                 request.setParameters(parameters);
                 request.executeAsync();
-                handleFBSignIn(profile);
+                handleFBSignIn(profile, true);
             }
 
             @Override
@@ -185,7 +235,8 @@ public class LoginFragment extends Fragment {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
                 Log.e(TAG, "onCurrentProfileChanged");
-                handleFBSignIn(newProfile);
+                handleFBSignIn(newProfile, true);
+
             }
         };
         accessTokenTracker.startTracking();
@@ -216,11 +267,28 @@ public class LoginFragment extends Fragment {
 
     private void onViewCreatedForNormalLogin(View view) {
         //initialize the text boxes and new user and sign in buttons.
-        etEmailOrPhone = (EditText) view.findViewById(R.id.editEmail);
+        mEmailView = (AutoCompleteTextView) view.findViewById(R.id.editemailorphone);
+        populateAutoComplete();
+
+        mPasswordView = (EditText) view.findViewById(R.id.editPassword);
+        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    attemptLogin();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+        mProgressView = view.findViewById(R.id.login_progress);
+
         /**
          * To inform user that only email or 10 digit phone number is to be entered.
          */
-        etEmailOrPhone.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mEmailView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b)
@@ -230,25 +298,24 @@ public class LoginFragment extends Fragment {
         /**
          * Enter press in this edit text should automatically take to next edit text - etPassword.
          */
-        etEmailOrPhone.setOnKeyListener(new View.OnKeyListener() {
+        mEmailView.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (keyEvent.getKeyCode() == 66) {
-                    etPassword.requestFocus();
+                    mPasswordView.requestFocus();
                 }
                 return false;
             }
         });
-        etPassword = (EditText) view.findViewById(R.id.editPassword);
         /**
          * Enter press in this edit text should start sign in process.
          */
-        etPassword.setOnKeyListener(new View.OnKeyListener() {
+        mPasswordView.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (keyEvent.getKeyCode() == 66) {
                     if (validateInformation())
-                        signIn();
+                        attemptLogin();
                 }
                 return false;
             }
@@ -258,7 +325,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (validateInformation())
-                    signIn();
+                    attemptLogin();
             }
         });
         btnForgotPassword = (Button) view.findViewById(R.id.btnForgotPassword);
@@ -277,21 +344,118 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    private void attemptLogin() {
+
+        // Reset errors.
+        mEmailView.setError(null);
+        mPasswordView.setError(null);
+
+        // Store values at the time of the login attempt.
+        String emailorphone = mEmailView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        final Map<String, String> pars = new HashMap<>();
+
+        if (emailorphone.contains("@")) {
+            pars.put("customer_email_id", emailorphone);
+        } else
+            pars.put("customer_phone_number", emailorphone);
+        pars.put("customer_password", password);
+        String url = "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/customer_login";
+
+        Log.e(TAG, "parameters=" + new JSONObject(pars));
+        JsonObjectRequest request = new JsonObjectRequest
+                (Request.Method.POST, url, new JSONObject(pars), new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.e(TAG, "Response: " + response.toString());
+                        try {
+                            if (!response.getString("success").equals("OK"))
+                                Toast.makeText(getActivity().getApplicationContext(), response.getString("error_message"), Toast.LENGTH_LONG).show();
+                            else {
+                                mUser = new User();
+                                mUser.setId(response.getString("customer_id"));
+                                mUser.setEmail(response.getString("customer_email_id"));
+                                mUser.setPhoneNumber(response.getString("customer_phone_number"));
+                                mUser.setName(response.getString("customer_name"));
+                                setValues(false, false, true);
+                                //SystemManager.saveInSharedPref(Constants.NORMALLOGIN, mUser, mSharedPreferences);
+                                SharedPreferences.Editor editorDetails = mSharedPreferences.edit();
+                                editorDetails.putString(Constants.USERNAME, mUser.getName());
+                                editorDetails.putString(Constants.USEREMAIL1, mUser.getEmail());
+                                Log.e("finalvalues", "" + mUser.getName() + "" + mUser.getEmail());
+                                editorDetails.apply();
+                                goToHomeActivity(true);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
+        //SystemManager.saveInSharedPref(Constants.NORMALLOGIN,customer,sharedPreference);
+        String msg = request.getUrl() + ", " + request;
+        Log.e(TAG, msg);
+        helper.add(request);
+    }
+
+
+    private void populateAutoComplete() {
+        if (!mayRequestContacts()) {
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= 14) {
+            // Use ContactsContract.Profile (API 14+)
+            // getLoaderManager().initLoader(0, null, LoginActivity.class);
+        } else if (Build.VERSION.SDK_INT >= 8) {
+            // Use AccountManager (API 8+)
+            new SetupEmailAutoCompleteTask().execute(null, null);
+        }
+    }
+
+    private boolean mayRequestContacts() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        if (getActivity().checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+            Snackbar.make(mEmailView, "Contacts permissions are needed for providing email completions", Snackbar.LENGTH_INDEFINITE)
+                    .setAction(android.R.string.ok, new View.OnClickListener() {
+                        @Override
+                        @TargetApi(Build.VERSION_CODES.M)
+                        public void onClick(View v) {
+                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                        }
+                    });
+        } else {
+            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+        }
+        return false;
+    }
+
     private boolean validateInformation() {
-        Log.e(TAG,"validate Info");
-        String emailOrPhone = etEmailOrPhone.getEditableText().toString();
-        if (SystemManager.isValidEmailOrPhone(emailOrPhone)){
-            if(emailOrPhone.contains("@")){
+        Log.e(TAG, "validate Info");
+        String emailOrPhone = mEmailView.getEditableText().toString();
+        if (SystemManager.isValidEmailOrPhone(emailOrPhone)) {
+            if (emailOrPhone.contains("@")) {
                 mUserEmail = emailOrPhone;
-                mUserPhoneNumber =null;
-            }
-            else{
+                mUserPhoneNumber = null;
+            } else {
                 mUserEmail = null;
                 mUserPhoneNumber = emailOrPhone;
             }
-        }else
+        } else
             return false;
-        mPassword = etPassword.getEditableText().toString();
+        mPassword = mPasswordView.getEditableText().toString();
         if (mPassword.isEmpty()) {
             Toast.makeText(getContext(), R.string.text_enter_password, Toast.LENGTH_LONG).show();
             return false;
@@ -307,44 +471,25 @@ public class LoginFragment extends Fragment {
     }
 
     private void forgotPassword() {
-        Intent intent = new Intent(getActivity(),ForgotPasswordActivity.class);
-        String userEmailOrPhone = etEmailOrPhone.getEditableText().toString();
-        if(!userEmailOrPhone.isEmpty()){
-            if(SystemManager.isValidEmailOrPhone(userEmailOrPhone)){
-                if(userEmailOrPhone.contains("@"))
-                    intent.putExtra(Constants.USEREMAIL,userEmailOrPhone);
+        Intent intent = new Intent(getActivity(), ForgotPasswordActivity.class);
+        String userEmailOrPhone = mEmailView.getEditableText().toString();
+        if (!userEmailOrPhone.isEmpty()) {
+            if (SystemManager.isValidEmailOrPhone(userEmailOrPhone)) {
+                if (userEmailOrPhone.contains("@"))
+                    intent.putExtra(Constants.USEREMAIL, userEmailOrPhone);
                 else
-                    intent.putExtra(Constants.USERPHONE,userEmailOrPhone);
+                    intent.putExtra(Constants.USERPHONE, userEmailOrPhone);
             }
         }
         startActivity(intent);
     }
 
     private void signIn() {
-        Log.e(TAG,"signIn");
+        Log.e(TAG, "signIn");
         User user = new User();
         user.setEmail(mUserEmail);
         user.setPhoneNumber(mUserPhoneNumber);
-        Cursor result = SystemManager.isRegistered(user);
-        if (result != null) {
-            Log.e(TAG,"sign in result not null");
-            result.moveToFirst();
-            String password = result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PASSWORD));
-            if (mPassword.equals(password)) {
-                mUser = new User();
-                mUser.setId(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NO)));
-                mUser.setEmail(mUserEmail);
-                mUser.setPhoneNumber(mUserPhoneNumber);
-                mUser.setName(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_NAME)));
-                setValues(false, false, true);
-                SystemManager.saveInSharedPref(Constants.NORMALLOGIN,mUser,mSharedPreferences);
-                goToHomeActivity(true);
-            } else {
-                Toast.makeText(getContext(), R.string.text_invalid_password, Toast.LENGTH_LONG).show();
-            }
-        } else
-            Toast.makeText(getContext(), R.string.text_not_yet_registered, Toast.LENGTH_LONG).show();
-        SystemManager.closeDB();
+
     }
 
     private void onViewCreatedForGoogleLogin(View view) {
@@ -357,14 +502,7 @@ public class LoginFragment extends Fragment {
                 googleLogIn();
             }
         });
-        // [START customize_button]
-        // Customize sign-in button. The sign-in button can be displayed in
-        // multiple sizes and color schemes. It can also be contextually
-        // rendered based on the requested scopes. For example. a red button may
-        // be displayed when Google+ scopes are requested, but a white button
-        // may be displayed when only basic profile is requested. Try adding the
-        // Scopes.PLUS_LOGIN scope to the GoogleSignInOptions to see the
-        // difference.
+
 
         btnGoogleLogIn.setSize(SignInButton.SIZE_WIDE);  //cant have int. will hv to use stndrd sizes
         btnGoogleLogIn.setScopes(gso.getScopeArray());
@@ -426,7 +564,9 @@ public class LoginFragment extends Fragment {
      *
      * @param newProfile data to populate the User object and call goToHomeActvity with isLoginSuccessful as true
      */
-    private void handleFBSignIn(Profile newProfile) {
+    private void handleFBSignIn(Profile newProfile, Boolean check) {
+
+        this.check = check;
         Log.e(TAG, "handleFBSignIn");
         if (newProfile == null) {
             Log.e(TAG, "handleFBSignIn having profile : " + null);
@@ -439,8 +579,16 @@ public class LoginFragment extends Fragment {
         //Initialize user information
         mUser.setName(newProfile.getFirstName() + " " + newProfile.getLastName());
         mUser.setId("f" + newProfile.getId());
-        mUser.setEmail(null);
-        registerOrSignIn();
+
+        fbUserId = mUser.getId();
+        fbUserName = mUser.getName();
+        if (check == false) {
+            fbUserEmail = mSharedPreferences.getString(Constants.USEREMAIL1, null);
+        } else {
+            fbUserEmail = mSharedPreferences.getString(Constants.USEREMAIL, null);
+        }
+        mUser.setEmail(fbUserEmail);
+        regActivity.notRegistered("fb");
         goToHomeActivity(true);
     }
 
@@ -456,11 +604,18 @@ public class LoginFragment extends Fragment {
                 String email = jsonObj.getString(Constants.GRAPH_EMAIL);
                 if (email != null) {
                     mUser.setEmail(email);
-                    updateDB();
+
                 }
                 mUser.setPhoneNumber(null);
                 setValues(true, false, false);
-                registerOrSignIn();
+                fbUserId = mUser.getId();
+                fbUserName = mUser.getName();
+                fbUserEmail = mUser.getEmail();
+                SharedPreferences.Editor editor1 = mSharedPreferences.edit();
+                editor1.putString(Constants.USEREMAIL, fbUserEmail);
+                editor1.apply();
+                regActivity.notRegistered("fb");
+
                 goToHomeActivity(true);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -470,52 +625,13 @@ public class LoginFragment extends Fragment {
         }
     }
 
-    private void updateDB() {
-        UserDatabase databaseManager = SystemManager.getDatabaseManager();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseFields.KEY_CUSTOMER_EMAIL, mUser.getEmail()); // (column name, new row value)
-        String selection = DatabaseFields.KEY_CUSTOMER_NO + " = ?"; // where ID column = rowId (that is, selectionArgs)
-        String[] selectionArgs = {String.valueOf(mUser.getId())};
-        try {
-            databaseManager.openDatabase();
-            databaseManager.update(DatabaseFields.TABLE_USER, contentValues, selection,
-                    selectionArgs);
-            databaseManager.closeDatabase();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * Method used to check whether the user is already registered or is signing up for the first time.
-     * mUser stores the logged in users profile to verify if its a new user or an already signed in one.
-     */
-    public void registerOrSignIn() {
-        Log.e(TAG, "registerOrSignIn");
-        Log.e(TAG, "ID : " + mUser.getId());
-        Log.e(TAG, "Name : " + mUser.getName());
-        Log.e(TAG, "Email : " + mUser.getEmail());
-        Cursor result = SystemManager.isRegistered(mUser);
-        if (result != null) {
-            result.moveToFirst();
-            mUser.setPhoneNumber(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_PHONE)));
-            mUser.setEmail(result.getString(result.getColumnIndex(DatabaseFields.KEY_CUSTOMER_EMAIL)));
-            Log.e(TAG, "Old signin");
-        } else {
-            String query = SystemManager.createRegisterQuery(mUser);
-            SystemManager.execSQLQuery(query);
-            Log.e(TAG, "new signing");
-        }
-        SystemManager.closeDB();
-        SystemManager.saveInSharedPref(null, mUser, mSharedPreferences);
-    }
 
     /**
      * This method called when user clicks on GoogleSignIn button and is then used to configure
      * GoogleSignInOptions and GoogleApiClient objects
      * which are then used to initiate the login request through the signInIntent
      */
+
 
     private void googleLogIn() {
         Log.e(TAG, "googleLogIn");
@@ -531,7 +647,10 @@ public class LoginFragment extends Fragment {
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
+            Log.e("mhere", "1");
+            Log.e("data:", "" + data);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Log.e("reslut:", "" + result);
             handleGoogleSignInResult(result);
         } else {
             //for fb login
@@ -557,7 +676,7 @@ public class LoginFragment extends Fragment {
             mUser.setName(acct.getDisplayName());
             mUser.setId("g" + acct.getId());
             mUser.setEmail(acct.getEmail());
-            registerOrSignIn();
+
             setValues(false, true, true);
             goToHomeActivity(true);
         } else {
@@ -581,13 +700,32 @@ public class LoginFragment extends Fragment {
             if (!isLoggedIn)
                 setLoginMethod();
             Intent intent;
-            if(getActivity()!=null)
+            if (getActivity() != null)
                 intent = new Intent(getActivity(), HomeActivity.class);
             else
+                getUserInfo();
+            mSharedPreferences = SystemManager.getCurrentContext().getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
+                    Activity.MODE_PRIVATE);
+            Log.e("checker", mSharedPreferences.getString(Constants.IS_ADDRESS_SAVED, null));
+            if (mSharedPreferences.getString(Constants.IS_ADDRESS_SAVED, null).equalsIgnoreCase("true")) {
+                intent = new Intent(SystemManager.getCurrentContext(), MenuActivity.class);
+                Toast.makeText(SystemManager.getCurrentContext(), "Address saved", Toast.LENGTH_LONG).show();
+            } else {
                 intent = new Intent(SystemManager.getCurrentContext(), HomeActivity.class);
-            Toast.makeText(SystemManager.getCurrentContext(), "Welcome "+mUser.getName()+". Happy Discounting :)", Toast.LENGTH_LONG).show();
-            startActivity(intent);
-            getActivity().finish();
+                Toast.makeText(SystemManager.getCurrentContext(), "Address not saved", Toast.LENGTH_LONG).show();
+            }
+
+            Toast.makeText(SystemManager.getCurrentContext(), "Welcome " + mUser.getName() + ". Happy Discounting :)", Toast.LENGTH_LONG).show();
+
+
+            if (isAdded()) {
+                try {
+                    startActivity(intent);
+                    getActivity().finish();
+                } catch (Exception e) {
+                    Log.e(TAG, "No activity attached.");
+                }
+            }
         } else {
             Log.e(TAG, "Sign In UnSuccessful, no change in page");
             Toast.makeText(SystemManager.getCurrentContext(), R.string.toast_unsuccessful_google_login, Toast.LENGTH_LONG);
@@ -621,7 +759,7 @@ public class LoginFragment extends Fragment {
         super.onResume();
         mSharedPreferences = getContext().getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,
                 Activity.MODE_PRIVATE);
-        getLoginMethod();
+        // getLoginMethod();
         if (isLoggedIn)
             goToHomeActivity(true);
         if (loggingThroughFB && !loggingThroughGoogle && !loggingThroughNone)
@@ -631,10 +769,11 @@ public class LoginFragment extends Fragment {
 
     private void onResumeFBSignIn() {
         Log.e(TAG, "onResumeFBSignIn");
-
+        //getUserInfo();
         Profile profile = Profile.getCurrentProfile();
         if (profile != null)
-            handleFBSignIn(profile);
+            handleFBSignIn(profile, true);
+        getUserInfo();
     }
 
 
@@ -652,10 +791,7 @@ public class LoginFragment extends Fragment {
             loginMethod = Constants.NORMALLOGIN;
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Constants.LOGINMETHOD, loginMethod);
-        /*editor.putString(Constants.USERID,mUser.getId());
-        editor.putString(Constants.USERNAME,mUser.getName());
-        editor.putString(Constants.USEREMAIL,mUser.getEmail());
-        editor.putString(Constants.USERPHONE,mUser.getPhoneNumber());*/
+
         editor.apply();
     }
 
@@ -663,21 +799,26 @@ public class LoginFragment extends Fragment {
      * Get value from shared preference and identify the method of login.
      */
     private void getLoginMethod() {
-        String loginMethod = mSharedPreferences.getString(Constants.LOGINMETHOD, null);
-        Log.e(TAG, "login method is " + loginMethod);
+        String login1Method = mSharedPreferences.getString(Constants.LOGINMETHOD, null);
+        //login1Method=""+loggingThroughGoogle;
+        Log.e(TAG, "login method is " + login1Method);
         isLoggedIn = true;
-        if (loginMethod == null) {
+        if (login1Method == null) {
             Log.e(TAG, "Not logged in");
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString(Constants.IS_ADDRESS_SAVED, "false");
+            editor.apply();
+            editor.commit();
             isLoggedIn = false;
             setValues(true, true, true);
             return;
         } else {
             getUserInfo();
-            if (loginMethod.equals(Constants.FBLOGIN)) {
+            if (login1Method.equals(Constants.FBLOGIN)) {
                 setValues(true, false, false);
-            } else if (loginMethod.equals(Constants.GOOGLELOGIN)) {
+            } else if (login1Method.equals(Constants.GOOGLELOGIN)) {
                 setValues(false, true, false);
-            } else if (loginMethod.equals(Constants.NORMALLOGIN)) {
+            } else if (login1Method.equals(Constants.NORMALLOGIN)) {
                 setValues(false, false, true);
             }
         }
@@ -709,4 +850,53 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
+        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(getActivity().getApplicationContext(),
+                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+
+        mEmailView.setAdapter(adapter);
+    }
+
+    class SetupEmailAutoCompleteTask extends AsyncTask<Void, Void, List<String>> {
+
+        @Override
+        protected List<String> doInBackground(Void... voids) {
+            ArrayList<String> emailAddressCollection = new ArrayList<>();
+
+            // Get all emails from the user's contacts and copy them to a list.
+            ContentResolver cr = getActivity().getContentResolver();
+            Cursor emailCur = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+                    null, null, null);
+            while (emailCur.moveToNext()) {
+                String email = emailCur.getString(emailCur.getColumnIndex(ContactsContract
+                        .CommonDataKinds.Email.DATA));
+                emailAddressCollection.add(email);
+            }
+            emailCur.close();
+
+            return emailAddressCollection;
+        }
+
+        @Override
+        protected void onPostExecute(List<String> emailAddressCollection) {
+            addEmailsToAutoComplete(emailAddressCollection);
+        }
+    }
 }
