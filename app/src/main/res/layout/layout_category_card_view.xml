@@ -21,18 +21,20 @@
         <!--android:paddingTop="5dp">-->
 
         <RelativeLayout
-            android:layout_width="500sp"
-            android:layout_height="150sp"
+            android:layout_width="150sp"
+            android:layout_height="100sp"
             android:layout_gravity="center"
             android:background="@color/white"
             android:gravity="center">
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/category_icon"
-                android:layout_width="100sp"
-                android:layout_height="100sp"
+                android:layout_width="40sp"
+                android:layout_height="40sp"
                 android:layout_marginBottom="5sp"
                 android:foregroundGravity="center"
+android:layout_marginLeft="20sp"
+                android:layout_marginRight="20sp"
                 android:src="@drawable/robe" />
 
             <TextView
@@ -40,9 +42,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/category_icon"
+
                 android:layout_marginLeft="5sp"
                 android:foregroundGravity="center"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:text="clothing"
                 android:textColor="@color/black" />
         </RelativeLayout>

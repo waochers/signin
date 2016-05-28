@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="190dp"
-    android:background="@color/waochers_tm_yellow"
+    android:background="@color/waocher_theme"
     android:orientation="vertical"
     >
 
