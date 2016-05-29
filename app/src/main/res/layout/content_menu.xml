@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#cfd8dc"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50sp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="7sp"
+        android:layout_marginLeft="2sp"
+        android:layout_marginRight="2sp"
+        android:layout_marginTop="60sp"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvYou"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingRight="5sp"
+            android:text="@string/you_are_in"
+            android:textColor="@color/waocher_theme"
+            android:textSize="20sp" />
+
+        <TextView
+
+            android:id="@+id/tvArea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="sector 14"
+            android:textColor="@color/waocher_theme"
+            android:textSize="20sp"
+
+            />
+    </LinearLayout>
+
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="800sp">-->
+
+        <GridView
+
+            android:id="@+id/gvMenu"
+            android:layout_width="match_parent"
+            android:layout_height="700sp"
+            android:layout_marginLeft="5sp"
+            android:layout_marginRight="5sp"
+            android:layout_marginTop="3sp"
+            android:background="#cfd8dc"
+            android:columnWidth="200sp"
+            android:gravity="center"
+            android:horizontalSpacing="2sp"
+            android:numColumns="3"
+
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="2sp" />
+    <!--</android.support.v7.widget.RecyclerView>-->
+    <!--android:paddingTop="50dp"-->
+</LinearLayout>
+
+
+    <!--fontPath="Steelworks Vintage Demo.ttf"-->
