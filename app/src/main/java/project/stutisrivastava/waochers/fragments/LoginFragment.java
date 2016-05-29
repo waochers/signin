@@ -284,7 +284,7 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
 
 
         mProgressView = view.findViewById(R.id.login_progress);
-
+       // ImageView logo=(ImageView)view.findViewById(R.id.logo);
         /**
          * To inform user that only email or 10 digit phone number is to be entered.
          */
@@ -362,7 +362,10 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
             pars.put("customer_phone_number", emailorphone);
         pars.put("customer_password", password);
         String url = "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/customer_login";
-
+        final ProgressDialog loading = new ProgressDialog(getActivity(), R.style.MyTheme);
+        loading.setIndeterminate(true);
+        loading.setIndeterminateDrawable(getResources().getDrawable(R.anim.progress_dialog_icon_drawable_animation, getActivity().getTheme()));
+        loading.show();
         Log.e(TAG, "parameters=" + new JSONObject(pars));
         JsonObjectRequest request = new JsonObjectRequest
                 (Request.Method.POST, url, new JSONObject(pars), new Response.Listener<JSONObject>() {
@@ -385,7 +388,9 @@ public class LoginFragment extends Fragment implements LoaderManager.LoaderCallb
                                 editorDetails.putString(Constants.USEREMAIL1, mUser.getEmail());
                                 Log.e("finalvalues", "" + mUser.getName() + "" + mUser.getEmail());
                                 editorDetails.apply();
+                                loading.dismiss();
                                 goToHomeActivity(true);
+
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
