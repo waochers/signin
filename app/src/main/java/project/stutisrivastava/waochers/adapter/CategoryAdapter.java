@@ -74,24 +74,6 @@ public class CategoryAdapter extends BaseAdapter {
         networkImageView.setImageUrl(images.get(position), imageLoader);
         TextView textView = (TextView) convertView.findViewById(R.id.category_name);
 
-//
-//
-//        // title
-//        title.setText(m.getTitle());
-        //NetworkImageView
-
-        //Initializing ImageLoader
-
-
-        //Setting the image url to load
-        //  networkImageView.setImageUrl(images.get(position), imageLoader);
-
-        //Creating a textview to show the title
-
-
-        //Scaling the imageview
-//        networkImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//        networkImageView.setLayoutParams(new GridView.LayoutParams(500, 500));
 
         textView.setText(names.get(position));
         //Adding views to the layout

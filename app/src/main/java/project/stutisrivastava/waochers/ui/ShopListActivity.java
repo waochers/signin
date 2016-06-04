@@ -12,7 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MotionEvent;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -60,10 +59,7 @@ public class ShopListActivity extends SampleActivityBase {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#4db6ac")));
-//        View decorView = getWindow().getDecorView();
-//// Hide the status bar.
-//        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-//        decorView.setSystemUiVisibility(uiOptions);
+
 
         super.onCreateDrawer();
         super.setDrawerContent();
@@ -72,32 +68,7 @@ public class ShopListActivity extends SampleActivityBase {
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
 
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-                Log.e(TAG, " Clicked on Item ");
-
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
-//        mRecyclerView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//
-//            }
-//        });
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
@@ -131,18 +102,7 @@ public class ShopListActivity extends SampleActivityBase {
         return results;
     }
 
-/*
-@Override
-protected void onResume() {
-super.onResume();
-((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new MyRecyclerViewAdapter
-.MyClickListener() {
 
-public void onItemClick(int position, View v) {
-}
-});
-}
-*/
 
     private ArrayList<Shops> getDataSet(JSONObject response) {
         results = new ArrayList<>();

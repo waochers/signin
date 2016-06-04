@@ -1,6 +1,7 @@
 package project.stutisrivastava.waochers.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 
 import project.stutisrivastava.waochers.R;
 import project.stutisrivastava.waochers.model.Shops;
+import project.stutisrivastava.waochers.ui.ShopViewActivity;
 import project.stutisrivastava.waochers.util.CustomVolleyRequest;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
@@ -57,7 +59,14 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         holder.shop_address.setText(shop.getShopAddress());
         holder.shop_discount.setText(shop.getMinDiscount());
 
-
+     holder.imageView.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+             Intent intent=new Intent(context, ShopViewActivity.class);
+             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+             context.startActivity(intent);
+         }
+     });
 
 
     }

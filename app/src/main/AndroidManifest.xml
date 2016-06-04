@@ -51,7 +51,8 @@
             android:name=".ui.RegisterActivity"
             android:label="Registration" />
         <activity android:name=".ui.ForgotPasswordActivity" />
-        <activity android:name=".ui.ShopListActivity"
+        <activity
+            android:name=".ui.ShopListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -72,6 +73,7 @@
                 android:name="com.google.android.gms.version"
                 android:value="@integer/google_play_services_version" />
         </activity>
+        <activity android:name=".ui.ShopViewActivity"></activity>
     </application>
 
 </manifest>
