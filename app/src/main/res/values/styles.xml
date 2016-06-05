@@ -12,8 +12,10 @@
         <item name="windowNoTitle">true</item>
         <!--<item name="android:colorPrimary">@color/PrimaryColor</item>-->
         <!--<item name="android:colorPrimaryDark">@color/PrimaryDarkColor</item>-->
-        <item name="android:statusBarColor">@color/waocher_theme</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -53,10 +55,10 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">4dp</item>
-        <item name="android:src">@android:drawable/ic_menu_rotate</item>
+        <item name="android:src">@drawable/placeholder</item>
         <item name="borderWidth">0dp</item>
         <item name="elevation">6dp</item>
-        <item name="android:color">@color/accent</item>
+        <item name="android:background">@color/waocher_theme</item>
         <item name="pressedTranslationZ">12dp</item>
         <item name="rippleColor">@android:color/white</item>
     </style>
