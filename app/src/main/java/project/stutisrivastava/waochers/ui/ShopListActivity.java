@@ -59,8 +59,6 @@ public class ShopListActivity extends SampleActivityBase {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#4db6ac")));
-
-
         super.onCreateDrawer();
         super.setDrawerContent();
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -77,15 +75,17 @@ public class ShopListActivity extends SampleActivityBase {
         //Showing a progress dialog while our app fetches the data from url
         final ProgressDialog loading = new ProgressDialog(this, R.style.MyTheme);
         loading.setIndeterminate(true);
+        loading.setCanceledOnTouchOutside(false);
         loading.setIndeterminateDrawable(getResources().getDrawable(R.anim.progress_dialog_icon_drawable_animation, getTheme()));
         loading.show();
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_shops/1/area/saket", null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                loading.dismiss();
+
                 Log.e(TAG, "" + response);
                 results = getDataSet(response);
+                loading.dismiss();
             }
 
 
@@ -101,7 +101,6 @@ public class ShopListActivity extends SampleActivityBase {
         helper.add(request);
         return results;
     }
-
 
 
     private ArrayList<Shops> getDataSet(JSONObject response) {
