@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cardview_light_background"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="159dp"
+        android:layout_marginTop="60sp"
+        android:layout_weight="0.18"
+        android:background="@drawable/couponwithqr">
+
+        <TextView
+            android:id="@+id/tvDealId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50sp"
+            android:layout_marginTop="20sp"
+            android:layout_weight="0.18"
+            android:text="Deal Id"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvDealTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvDealId"
+            android:layout_marginLeft="50sp"
+            android:layout_marginTop="20sp"
+            android:layout_weight="0.18"
+            android:text="Deal Validity"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/separator"
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/description"
+        android:layout_marginBottom="5sp"
+        android:background="#000000" />
+
+    <LinearLayout
+        android:id="@+id/linearRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20sp"
+        android:layout_marginTop="20sp"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginRight="20sp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginRight="20sp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginRight="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearRow2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20sp"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginRight="20sp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginRight="20sp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp"
+            android:layout_marginRight="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.58"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="25sp"
+            android:layout_marginTop="25sp"
+            android:gravity="center"
+            android:text="You pay"
+            android:textSize="30sp" />
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="324dp"
+            android:layout_height="39dp"
+            android:layout_gravity="center_horizontal"
+            android:editable="false"
+            android:gravity="center"
+            android:foregroundGravity="center_horizontal"
+            android:textSize="30sp"
+            android:text="50 Rs"
+            android:layout_weight="0.35" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:layout_marginBottom="20sp"
+        android:layout_marginTop="5sp"
+        android:background="@color/waocher_theme"
+        android:text="Buy Deal"
+        android:textSize="25sp"
+        android:layout_weight="0.56" />
+</LinearLayout>

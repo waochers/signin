@@ -3,13 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#cfd8dc">
+    android:background="@drawable/backrepeat"
+    android:tileMode="repeat"
+    android:gravity="clip_horizontal">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/my_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="70sp"></android.support.v7.widget.RecyclerView>
+        android:layout_marginTop="50sp"></android.support.v7.widget.RecyclerView>
 
     <!--<android.support.v7.widget.RecyclerView-->
         <!--android:id="@+id/my_recycler_view"-->

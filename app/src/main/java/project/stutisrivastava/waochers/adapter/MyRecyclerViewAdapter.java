@@ -52,7 +52,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             imageLoader = CustomVolleyRequest.getInstance(context).getImageLoader();
         }
         imageLoader = CustomVolleyRequest.getInstance(context).getImageLoader();
-        imageLoader.get(shop.getShopImage(), ImageLoader.getImageListener(holder.imageView, R.drawable.images, R.drawable.images));
+        imageLoader.get(shop.getShopImage(), ImageLoader.getImageListener(holder.imageView, R.drawable.location, R.drawable.location));
 
         holder.imageView.setImageUrl(shop.getShopImage(), imageLoader);
         holder.shop_name.setText(shop.getShopName());

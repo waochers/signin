@@ -91,6 +91,7 @@ public class MenuActivity extends SampleActivityBase {
        //  loading = ProgressDialog.show(this, "Please wait...", "Fetching data...", false, false);
         final ProgressDialog loading = new ProgressDialog(this, R.style.MyTheme);
         loading.setIndeterminate(true);
+        loading.setCanceledOnTouchOutside(false);
         loading.setIndeterminateDrawable(getResources().getDrawable(R.anim.progress_dialog_icon_drawable_animation, getTheme()));
 //        loading.setMessage("Some Text");
         loading.show();
