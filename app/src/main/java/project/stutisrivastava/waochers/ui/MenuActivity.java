@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import project.stutisrivastava.waochers.R;
 import project.stutisrivastava.waochers.activities.SampleActivityBase;
 import project.stutisrivastava.waochers.adapter.CategoryAdapter;
+import project.stutisrivastava.waochers.util.Constants;
 import project.stutisrivastava.waochers.util.LearningToUseVolley;
 
 public class MenuActivity extends SampleActivityBase {
@@ -51,6 +52,7 @@ public class MenuActivity extends SampleActivityBase {
     private String TAG = "MenuActivity";
     private String catName;
     private String catImage;
+    private String locality;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +65,17 @@ public class MenuActivity extends SampleActivityBase {
         super.setDrawerContent();
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "Raleway-Bold.ttf");
 
-        prefs = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-       // String one = prefs.getString("addressKey", null);
+        prefs = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        locality = prefs.getString(Constants.ADDRESSKEY, null);
+        Log.e(TAG, "" + prefs);
+        Log.e(TAG, "" + locality);
         //Toast.makeText(getApplicationContext(), one, Toast.LENGTH_LONG).show();
         Log.e(TAG, "activity initialized");
 
         gridView = (GridView) findViewById(R.id.gvMenu);
         TextView tvYou=(TextView)findViewById(R.id.tvYou);
+        TextView tvArea=(TextView)findViewById(R.id.tvArea);
+        tvArea.setText(locality);
         tvYou.setTypeface(custom_font);
         getData();
         // gridview.setAdapter(new CategoryAdapter(this));
@@ -95,7 +101,7 @@ public class MenuActivity extends SampleActivityBase {
         loading.setIndeterminateDrawable(getResources().getDrawable(R.anim.progress_dialog_icon_drawable_animation, getTheme()));
 //        loading.setMessage("Some Text");
         loading.show();
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_area_shops/Saket", null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_area_shops/"+locality, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 loading.dismiss();

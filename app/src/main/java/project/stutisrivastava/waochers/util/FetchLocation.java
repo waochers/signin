@@ -47,7 +47,7 @@ public class FetchLocation implements LocationListener, GoogleApiClient.Connecti
     private static final String TAG = FetchLocation.class.getName();
     public static GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private static Location mLastLocation;
+    public static Location mLastLocation;
     private static Messenger messageHandler;
 
     public synchronized void buildGoogleApiClient() {

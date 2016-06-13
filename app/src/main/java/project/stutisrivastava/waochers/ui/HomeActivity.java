@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,6 +29,10 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import project.stutisrivastava.waochers.R;
 import project.stutisrivastava.waochers.activities.SampleActivityBase;
 import project.stutisrivastava.waochers.receivers.Receiver;
@@ -39,7 +46,7 @@ public class HomeActivity extends SampleActivityBase implements
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
-    public static final String MyPREFERENCES = "MyPrefs" ;
+   // public static final String MyPREFERENCES = "MyPrefs" ;
     public static Handler messageHandler = new MessageHandler();
     Button BLocation;
     Button BGps;
@@ -51,6 +58,7 @@ public class HomeActivity extends SampleActivityBase implements
     private String result_place;
     SharedPreferences prefs;
     SharedPreferences mSharedPreferences;
+    private Address locality_gps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +76,7 @@ public class HomeActivity extends SampleActivityBase implements
         img = (ImageView) findViewById(R.id.img1);
         BLocation = (Button) findViewById(R.id.butLocation);
         BGps = (Button) findViewById(R.id.butGps);
-        prefs=getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+       // prefs=getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
         BLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -235,8 +243,16 @@ public class HomeActivity extends SampleActivityBase implements
             Log.e("HomeActivity", "Address received " + result_gps);
             Toast.makeText(SystemManager.getCurrentContext(), "Got Location. " + result_gps, Toast.LENGTH_LONG).show();
             progressDialog.dismiss();
+            try {
+                locality_gps=getAddressForLocation(this,FetchLocation.mLastLocation);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.e(TAG,locality_gps.getLocality());
             SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString(Constants.ADDRESSKEY, "" + result_gps);
+            Log.e(TAG,""+editor);
+            Log.e(TAG,""+mSharedPreferences);
+            editor.putString(Constants.ADDRESSKEY, "" + locality_gps.getSubLocality());
             editor.putString(Constants.IS_ADDRESS_SAVED, "true");
             editor.apply();
             editor.commit();
@@ -252,7 +268,26 @@ public class HomeActivity extends SampleActivityBase implements
         }
 
     }
+    public Address getAddressForLocation(Context context, Location location) throws IOException {
 
+        if (location == null) {
+            return null;
+        }
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        Log.e(TAG,latitude+","+longitude+","+location);
+        int maxResults = 1;
+
+        Geocoder gc = new Geocoder(context, Locale.getDefault());
+        List<Address> addresses = gc.getFromLocation(latitude, longitude, maxResults);
+
+        if (addresses.size() == 1) {
+            Log.e(TAG,""+addresses.get(0).getSubLocality());
+            return addresses.get(0);
+        } else {
+            return null;
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
