@@ -1,7 +1,9 @@
 package project.stutisrivastava.waochers.ui;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -31,6 +33,7 @@ import project.stutisrivastava.waochers.R;
 import project.stutisrivastava.waochers.activities.SampleActivityBase;
 import project.stutisrivastava.waochers.adapter.MyRecyclerViewAdapter;
 import project.stutisrivastava.waochers.model.Shops;
+import project.stutisrivastava.waochers.util.Constants;
 import project.stutisrivastava.waochers.util.LearningToUseVolley;
 
 public class ShopListActivity extends SampleActivityBase {
@@ -40,17 +43,21 @@ public class ShopListActivity extends SampleActivityBase {
     private static final String TAG_SHOP_MIN_DISCOUNT = "min_discount";
     private static String TAG = "ShopListActivity";
     LearningToUseVolley helper = new LearningToUseVolley().getInstance();
+    SharedPreferences prefs;
     private RecyclerView mRecyclerView;
     private MyRecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private String catName;
     private JSONObject response;
     private ArrayList<Shops> results;
+    private String DATA_URL = "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_shops/1/area/";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private String categoryId;
+    private String locality;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,16 +69,19 @@ public class ShopListActivity extends SampleActivityBase {
         super.onCreateDrawer();
         super.setDrawerContent();
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        getData();
+        prefs = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        locality = prefs.getString(Constants.ADDRESSKEY, null);
+        Intent shopIntent = getIntent();
+        categoryId = shopIntent.getStringExtra("catId");
+        getData(categoryId, locality);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
-    private ArrayList<Shops> getData() {
+    private ArrayList<Shops> getData(String categoryId, String locality) {
         //Showing a progress dialog while our app fetches the data from url
         final ProgressDialog loading = new ProgressDialog(this, R.style.MyTheme);
         loading.setIndeterminate(true);
@@ -79,7 +89,7 @@ public class ShopListActivity extends SampleActivityBase {
         loading.setIndeterminateDrawable(getResources().getDrawable(R.anim.progress_dialog_icon_drawable_animation, getTheme()));
         loading.show();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_shops/1/area/saket", null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_shops/" + categoryId + "/area/" + locality, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
 
@@ -123,10 +133,6 @@ public class ShopListActivity extends SampleActivityBase {
             e.printStackTrace();
         }
         mAdapter = new MyRecyclerViewAdapter(results, getApplicationContext());
-        Log.e("fyj", "" + results.get(0).getShopName());
-
-        Log.e("gf", "" + results.get(1).getShopName());
-
         mRecyclerView.setAdapter(mAdapter);
 
 

@@ -38,21 +38,25 @@ import project.stutisrivastava.waochers.util.LearningToUseVolley;
 public class MenuActivity extends SampleActivityBase {
     public static final String TAG_IMAGE_URL = "category_image";
     public static final String TAG_NAME = "category_name";
-    public static final String MyPREFERENCES = "MyPrefs";
     private static final String DATA_URL = "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_area_shops/";
+    private static final String TAG_IMAGE_ID = "category_id" ;
     SharedPreferences prefs;
     GridView gridView;
     LearningToUseVolley helper = new LearningToUseVolley().getInstance();
     ArrayList<String> images;
     ArrayList<String> names;
+    ArrayList<String> ids;
     //Creating GridViewAdapter Object
     CategoryAdapter gridViewAdapter = new CategoryAdapter(this, images, names);
     ArrayList<String> finImage;
     ArrayList<String> finName;
+    ArrayList<String> finIds;
     private String TAG = "MenuActivity";
     private String catName;
     private String catImage;
     private String locality;
+    private String catId;
+    private String categoryId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +89,10 @@ public class MenuActivity extends SampleActivityBase {
                                     int position, long id) {
                 Toast.makeText(MenuActivity.this, "" + position,
                         Toast.LENGTH_SHORT).show();
+                Log.e(TAG,""+ids.get(position)+names.get(position));
+                categoryId=ids.get(position);
                 Intent intentMenu = new Intent(getApplicationContext(), ShopListActivity.class);
+                intentMenu.putExtra("catId",categoryId);
                 startActivity(intentMenu);
             }
         });
@@ -101,7 +108,7 @@ public class MenuActivity extends SampleActivityBase {
         loading.setIndeterminateDrawable(getResources().getDrawable(R.anim.progress_dialog_icon_drawable_animation, getTheme()));
 //        loading.setMessage("Some Text");
         loading.show();
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://stutisrivastv.pythonanywhere.com/Test1/customer/api/get_area_shops/"+locality, null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, DATA_URL+locality, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 loading.dismiss();
@@ -129,6 +136,8 @@ public class MenuActivity extends SampleActivityBase {
         names = new ArrayList<>();
         finName = new ArrayList<>();
         finImage = new ArrayList<>();
+        ids=new ArrayList<>();
+        finIds=new ArrayList<>();
         try {
 
             JSONArray arrResults = response.getJSONArray("results");
@@ -143,12 +152,15 @@ public class MenuActivity extends SampleActivityBase {
                     Log.e(TAG, "category:" + "" + objCategories.get(TAG_NAME));
                     catName = objCategories.getString(TAG_NAME);
                     catImage = objCategories.getString(TAG_IMAGE_URL);
+                    catId=objCategories.getString(TAG_IMAGE_ID);
                     if (finName.size() <= 0) {
                         Log.e(TAG, "here3");
                         images.add(catImage);
                         names.add(catName);
+                        ids.add(catId);
                         finName.add(catName);
                         finImage.add(catImage);
+                        finIds.add(catId);
                     } else {
 
                         if(finName.contains(catName)){
@@ -160,8 +172,10 @@ public class MenuActivity extends SampleActivityBase {
 
                             images.add(catImage);
                             names.add(catName);
+                            ids.add(catId);
                             finName.add(catName);
                             finImage.add(catImage);
+                            finIds.add(catId);
                         }
                     }
 

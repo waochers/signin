@@ -188,7 +188,7 @@ public class HomeActivity extends SampleActivityBase implements
                 Log.i(TAG, "Place Selected: " + place.getLocale());
                 // Format the place's details and display them in the TextView.
                 SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.putString(Constants.ADDRESSKEY, "" + place.getAddress());
+                editor.putString(Constants.ADDRESSKEY, "" + place.getName());
                 editor.putString(Constants.IS_ADDRESS_SAVED, "true");
                 editor.apply();
                 editor.commit();
